@@ -9,6 +9,7 @@ import api from '../../services/api';
 
 const Messages = () => {
   const { user } = useSelector((state) => state.auth);
+  const isDoctor = user?.role === 'doctor';
   const { toasts, toast, removeToast } = useToast();
 
   const [conversations, setConversations] = useState([]);
@@ -21,7 +22,7 @@ const Messages = () => {
   // Fetch conversations on mount
   useEffect(() => {
     fetchConversations();
-  }, []);
+  }, [isDoctor]);
 
   // Fetch messages when conversation selected
   useEffect(() => {
@@ -33,7 +34,7 @@ const Messages = () => {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const endpoint = '/patient/messages/conversations';
+      const endpoint = isDoctor ? '/doctor/messages/conversations' : '/patient/messages/conversations';
       const response = await api.get(endpoint);
       setConversations(response.data.data || []);
     } catch (error) {
@@ -46,7 +47,9 @@ const Messages = () => {
 
   const fetchMessages = async (conversationId) => {
     try {
-      const endpoint = `/patient/messages/conversations/${conversationId}`;
+      const endpoint = isDoctor
+        ? `/doctor/messages/conversations/${conversationId}`
+        : `/patient/messages/conversations/${conversationId}`;
       const response = await api.get(endpoint);
       setMessages(response.data.data || []);
     } catch (error) {
@@ -60,9 +63,11 @@ const Messages = () => {
 
     setSendingMessage(true);
     try {
-      const endpoint = '/patient/messages/send';
-      const recipientKey = 'doctorId';
-      const recipientId = selectedConversation.participants.doctor._id;
+      const endpoint = isDoctor ? '/doctor/messages/send' : '/patient/messages/send';
+      const recipientKey = isDoctor ? 'patientId' : 'doctorId';
+      const recipientId = isDoctor
+        ? selectedConversation.participants.patient._id
+        : selectedConversation.participants.doctor._id;
 
       const response = await api.post(endpoint, {
         [recipientKey]: recipientId,
@@ -107,11 +112,11 @@ const Messages = () => {
   };
 
   const getParticipant = (conversation) => {
-    return conversation.participants.doctor;
+    return isDoctor ? conversation.participants.patient : conversation.participants.doctor;
   };
 
   const getUnreadCount = (conversation) => {
-    return conversation.unreadCount.patient;
+    return isDoctor ? conversation.unreadCount.doctor : conversation.unreadCount.patient;
   };
 
   return (
@@ -168,7 +173,8 @@ const Messages = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <p className="font-medium text-gray-900 truncate">
-                                Dr. {formatName(participant)}
+                                {isDoctor ? '' : 'Dr. '}
+                                {formatName(participant)}
                               </p>
                               {unreadCount > 0 && (
                                 <span className="bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
@@ -206,7 +212,9 @@ const Messages = () => {
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No conversations</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      Start a conversation with your doctor
+                      {isDoctor
+                        ? 'Conversations with patients will appear here'
+                        : 'Start a conversation with your doctor'}
                     </p>
                   </div>
                 )}
@@ -226,10 +234,11 @@ const Messages = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          Dr. {formatName(getParticipant(selectedConversation))}
+                          {isDoctor ? '' : 'Dr. '}
+                          {formatName(getParticipant(selectedConversation))}
                         </h3>
                         <p className="text-sm text-gray-500 capitalize">
-                          {getParticipant(selectedConversation).specialization || 'Doctor'}
+                          {isDoctor ? 'Patient' : getParticipant(selectedConversation).specialization || 'Doctor'}
                         </p>
                       </div>
                     </div>

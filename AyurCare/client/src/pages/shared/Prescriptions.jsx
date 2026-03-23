@@ -4,8 +4,12 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Button from '../../components/common/Button';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/common/Toast';
+import PrescriptionModal from '../../components/doctor/PrescriptionModal';
+import api from '../../services/api';
+
 const Prescriptions = () => {
   const { user } = useSelector((state) => state.auth);
+  const isDoctor = user?.role === 'doctor';
   const { toasts, toast, removeToast } = useToast();
 
   const [prescriptions, setPrescriptions] = useState([]);
@@ -15,8 +19,32 @@ const Prescriptions = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
-    fetchPatientPrescriptions();
-  }, [filterStatus]);
+    if (isDoctor) {
+      fetchDoctorPrescriptions();
+    } else {
+      fetchPatientPrescriptions();
+    }
+  }, [isDoctor, filterStatus]);
+
+  const fetchDoctorPrescriptions = async () => {
+    try {
+      setLoading(true);
+      const queryParams = filterStatus !== 'all' ? `?status=${filterStatus}` : '';
+
+      const [medicationsRes, statsRes] = await Promise.all([
+        api.get(`/doctor/medications${queryParams}`),
+        api.get('/doctor/medications/stats'),
+      ]);
+
+      setPrescriptions(medicationsRes.data.data.medications || []);
+      setStats(statsRes.data.data);
+    } catch (error) {
+      toast.error('Failed to load prescriptions');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchPatientPrescriptions = async () => {
     try {
@@ -39,6 +67,9 @@ const Prescriptions = () => {
 
   const handlePrescriptionCreated = () => {
     setShowCreateModal(false);
+    if (isDoctor) {
+      fetchDoctorPrescriptions();
+    }
     toast.success('Prescription created successfully');
   };
 
@@ -64,15 +95,42 @@ const Prescriptions = () => {
         <div className="mb-6 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              My Prescriptions
+              {isDoctor ? 'Prescriptions Management' : 'My Prescriptions'}
             </h1>
             <p className="text-gray-600 mt-1">
-              View all your active and past prescriptions
+              {isDoctor
+                ? "View and manage all medications you've prescribed"
+                : 'View all your active and past prescriptions'}
             </p>
           </div>
+          {isDoctor && (
+            <Button onClick={() => setShowCreateModal(true)}>Create Prescription</Button>
+          )}
         </div>
 
-
+        {/* Stats Cards (Doctor Only) */}
+        {isDoctor && stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <p className="text-sm text-gray-600">Total Prescribed</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalPrescribed}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <p className="text-sm text-gray-600">Active</p>
+              <p className="text-3xl font-bold text-green-600 mt-2">{stats.activeMedications}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <p className="text-sm text-gray-600">Discontinued</p>
+              <p className="text-3xl font-bold text-yellow-600 mt-2">
+                {stats.discontinuedMedications}
+              </p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <p className="text-sm text-gray-600">Completed</p>
+              <p className="text-3xl font-bold text-gray-600 mt-2">{stats.completedMedications}</p>
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
@@ -106,7 +164,7 @@ const Prescriptions = () => {
                       Medication
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Prescribed By
+                      {isDoctor ? 'Patient' : 'Prescribed By'}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Dosage
@@ -120,6 +178,11 @@ const Prescriptions = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Status
                     </th>
+                    {isDoctor && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Actions
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -129,7 +192,11 @@ const Prescriptions = () => {
                         {prescription.medicationName}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
-                        {prescription.prescribingDoctor
+                        {isDoctor
+                          ? prescription.patient
+                            ? `${prescription.patient.firstName} ${prescription.patient.lastName}`
+                            : 'N/A'
+                          : prescription.prescribingDoctor
                           ? `Dr. ${prescription.prescribingDoctor.firstName} ${prescription.prescribingDoctor.lastName}`
                           : 'N/A'}
                       </td>
@@ -147,6 +214,11 @@ const Prescriptions = () => {
                           {prescription.status}
                         </span>
                       </td>
+                      {isDoctor && (
+                        <td className="px-6 py-4 text-sm">
+                          <button className="text-blue-600 hover:text-blue-900">Edit</button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -169,13 +241,22 @@ const Prescriptions = () => {
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">No prescriptions found</h3>
               <p className="mt-1 text-sm text-gray-500">
-                You have no prescriptions
+                {isDoctor
+                  ? 'Start by creating a prescription for a patient'
+                  : 'You have no prescriptions'}
               </p>
             </div>
           )}
         </div>
       </div>
 
+      {/* Create Prescription Modal (Doctor Only) */}
+      {isDoctor && showCreateModal && (
+        <PrescriptionModal
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={handlePrescriptionCreated}
+        />
+      )}
     </DashboardLayout>
   );
 };

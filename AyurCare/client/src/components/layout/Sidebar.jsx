@@ -3,7 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   FaLeaf,
   FaHome,
+  FaUserMd,
+  FaUsers,
   FaCalendarAlt,
+  FaBuilding,
+  FaChartBar,
+  FaCog,
+  FaCalendarCheck,
   FaFileMedical,
   FaEnvelope,
   FaUser,
@@ -11,6 +17,9 @@ import {
   FaClipboardList,
   FaChartLine,
   FaStar,
+  FaFlask,
+  FaFileAlt,
+  FaSeedling,
   FaSignOutAlt
 } from "react-icons/fa";
 import { logout } from "../../redux/slices/authSlice";
@@ -31,6 +40,31 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const getNavigationItems = () => {
     const role = user?.role;
+    if (role === "admin") {
+      return [
+        { name: "Overview", path: "/admin/dashboard", icon: FaHome },
+        { name: "Practitioners", path: "/admin/doctors", icon: FaUserMd },
+        { name: "Patients", path: "/admin/patients", icon: FaUsers },
+        { name: "Sessions", path: "/admin/appointments", icon: FaCalendarAlt },
+        { name: "Therapies", path: "/admin/therapy-types", icon: FaSeedling },
+        { name: "Rooms", path: "/admin/therapy-rooms", icon: FaBuilding },
+        { name: "Inventory", path: "/admin/inventory", icon: FaFlask },
+        { name: "Analytics", path: "/admin/analytics", icon: FaChartBar },
+        { name: "Reports", path: "/admin/reports", icon: FaFileAlt },
+        { name: "Settings", path: "/admin/settings", icon: FaCog },
+      ];
+    }
+    if (role === "doctor") {
+      return [
+        { name: "Overview", path: "/doctor/dashboard", icon: FaHome },
+        { name: "Today's Sessions", path: "/doctor/therapy-sessions", icon: FaCalendarCheck },
+        { name: "Treatment Plans", path: "/doctor/treatment-plans", icon: FaClipboardList },
+        { name: "My Patients", path: "/doctor/patients", icon: FaUsers },
+        { name: "Prescriptions", path: "/doctor/prescriptions", icon: FaFileMedical },
+        { name: "Messages", path: "/doctor/messages", icon: FaEnvelope },
+        { name: "Profile", path: "/doctor/profile", icon: FaUser },
+      ];
+    }
     if (role === "patient") {
       return [
         { name: "Overview", path: "/patient/dashboard", icon: FaHome },

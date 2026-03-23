@@ -66,7 +66,7 @@ const Landing = () => {
               </Link>
               <Link to="/register" className="px-6 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-500 transition shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5 active:translate-y-0 relative overflow-hidden group">
                 <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
-                <span className="relative flex items-center gap-2">Initialize <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" /></span>
+                <span className="relative flex items-center gap-2">Get Started <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" /></span>
               </Link>
             </div>
           </div>
@@ -89,16 +89,16 @@ const Landing = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="tracking-wide uppercase">Generative AI Panchakarma Protocol</span>
+                <span className="tracking-wide uppercase">Personalized Ayurvedic Wellness</span>
               </div>
 
               <h1 className="text-[3.5rem] sm:text-6xl text-transparent bg-clip-text bg-gradient-to-br from-white via-stone-200 to-stone-500 lg:text-[4.5rem] font-extrabold leading-[1.05] tracking-tighter mb-8 max-w-2xl">
-                Architecting clinical <br/>
+                Transforming traditional <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">Ayurvedic</span> healing.
               </h1>
 
               <p className="text-lg sm:text-xl text-stone-400 leading-relaxed mb-12 max-w-xl font-medium">
-                Deep-tech infrastructure for traditional medicine. AI-driven dosha mapping, longitudinal therapy tracking, and uncompromised patient oversight — consolidated.
+                A modern platform for Ayurvedic medicine. Personalized treatments, health tracking, and integrated care — all in one place.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-14">
@@ -106,7 +106,7 @@ const Landing = () => {
                   to="/register"
                   className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-emerald-600 text-white text-sm font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-500 transition-all shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] border border-emerald-500/50"
                 >
-                  Deploy Engine
+                  Create Account
                   <FaArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </Link>
                 <button
@@ -114,7 +114,7 @@ const Landing = () => {
                   className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-stone-900 text-white text-sm font-black uppercase tracking-widest rounded-2xl border border-stone-700 hover:bg-stone-800 hover:border-stone-600 transition-all"
                 >
                   <FaPlay className="w-3 h-3 text-emerald-500" />
-                  View Matrix
+                  Explore Therapies
                 </button>
               </div>
 
@@ -150,7 +150,7 @@ const Landing = () => {
                       </div>
                       <div>
                         <h4 className="text-white font-black text-sm tracking-wide">Panchakarma Protocol</h4>
-                        <p className="text-emerald-400 font-bold text-[10px] uppercase tracking-widest mt-0.5">Active Execution</p>
+                        <p className="text-emerald-400 font-bold text-[10px] uppercase tracking-widest mt-0.5">In Progress</p>
                       </div>
                     </div>
                     <div className="flex gap-1.5">
@@ -183,12 +183,12 @@ const Landing = () => {
 
                     {/* Timeline */}
                     <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5">
-                       <h5 className="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-4 border-b border-stone-800 pb-2">Therapeutic Pipeline</h5>
+                       <h5 className="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-4 border-b border-stone-800 pb-2">Therapy Plan</h5>
                        <div className="space-y-4">
                           {[
                             { icon: FaSeedling, name: "Purva Karma", stat: "Complete", tColor: "text-stone-400", bColor: "border-emerald-500/30", bg: "bg-emerald-500/10", iColor: "text-emerald-500" },
-                            { icon: FaFire, name: "Pradhana Karma", stat: "Executing", tColor: "text-stone-100 font-bold", bColor: "border-amber-500", bg: "bg-amber-500/20", iColor: "text-amber-400" },
-                            { icon: FaLeaf, name: "Paschat Karma", stat: "Queued", tColor: "text-stone-600", bColor: "border-stone-800", bg: "bg-stone-800", iColor: "text-stone-500" },
+                            { icon: FaFire, name: "Pradhana Karma", stat: "In Progress", tColor: "text-stone-100 font-bold", bColor: "border-amber-500", bg: "bg-amber-500/20", iColor: "text-amber-400" },
+                            { icon: FaLeaf, name: "Paschat Karma", stat: "Pending", tColor: "text-stone-600", bColor: "border-stone-800", bg: "bg-stone-800", iColor: "text-stone-500" },
                           ].map((s, i) => (
                              <div key={i} className="flex items-center gap-4">
                                <div className={`w-8 h-8 rounded-lg border ${s.bColor} ${s.bg} flex items-center justify-center shrink-0`}>
@@ -211,8 +211,8 @@ const Landing = () => {
                      <FaRobot className="w-4 h-4 text-purple-400" />
                    </div>
                    <div>
-                     <p className="text-xs font-black text-white">AI Matrix Online</p>
-                     <p className="text-[10px] text-purple-300 font-bold uppercase tracking-widest mt-0.5">Anomaly detected: None</p>
+                     <p className="text-xs font-black text-white">Health Insights</p>
+                     <p className="text-[10px] text-purple-300 font-bold uppercase tracking-widest mt-0.5">Status: Optimal</p>
                    </div>
                 </div>
 
@@ -221,8 +221,8 @@ const Landing = () => {
                      <FaChartLine className="w-4 h-4 text-blue-400" />
                    </div>
                    <div>
-                     <p className="text-xs font-black text-white">Recovery Vector</p>
-                     <p className="text-[10px] text-blue-300 font-bold uppercase tracking-widest mt-0.5">+14% Expected Yield</p>
+                     <p className="text-xs font-black text-white">Wellness Progress</p>
+                     <p className="text-[10px] text-blue-300 font-bold uppercase tracking-widest mt-0.5">+14% Improvement</p>
                    </div>
                 </div>
 
@@ -237,10 +237,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 divide-x divide-stone-800">
             {[
-              { value: "54.2K", label: "Therapies Executed" },
-              { value: "5", label: "Core Karma Modalities" },
-              { value: "98.7%", label: "Clinical Success Rate" },
-              { value: "< 2ms", label: "AI Latency Overhead" },
+              { value: "54.2K", label: "Treatments Completed" },
+              { value: "5", label: "Ayurvedic Therapies" },
+              { value: "98.7%", label: "Success Rate" },
+              { value: "100%", label: "Trusted by Patients" },
             ].map((s, i) => (
               <div key={i} className={`text-center px-4 ${i === 0 || i === 2 ? 'border-none md:border-solid' : i === 1 || i === 3 ? 'border-l border-stone-800' : ''}`}>
                 <p className="text-3xl lg:text-4xl font-black text-white mb-2">{s.value}</p>
@@ -258,14 +258,14 @@ const Landing = () => {
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-20 text-center lg:text-left">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-6">
-                <FaLeaf className="w-3 h-3" /> System Capabilities
+                <FaLeaf className="w-3 h-3" /> Our Therapies
               </div>
               <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                Five pillars of classical <br/><span className="text-stone-500">Panchakarma execution.</span>
+                Five pillars of classical <br/><span className="text-stone-500">Panchakarma healing.</span>
               </h2>
             </div>
             <p className="text-stone-400 font-medium max-w-md text-base lg:text-right">
-              Architecturally mapped biological reset protocols. Each vector targets specific toxic load capacities and systemic imbalances under rigorous computational oversight.
+              Ancient Ayurvedic treatments optimized for your body type. Each therapy targets specific imbalances to restore your natural health exactly where you need it.
             </p>
           </div>
 
@@ -304,10 +304,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-6">
-              <FaClipboardList className="w-3 h-3" /> Operational Flow
+              <FaClipboardList className="w-3 h-3" /> How It Works
             </div>
-            <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-6">Logic-gated healing architecture.</h2>
-            <p className="text-stone-400 text-lg">Systematized pathway entirely removing traditional friction. From neural-net dosha mapping to strict clinical oversight.</p>
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-6">A clear, simple path to wellness.</h2>
+            <p className="text-stone-400 text-lg">We provide a seamlessly integrated experience, from your first consultation all the way through your customized healing journey.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 relative">
@@ -315,9 +315,9 @@ const Landing = () => {
             <div className="hidden md:block absolute top-[4.5rem] left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-stone-800 via-emerald-500/50 to-stone-800"></div>
 
             {[
-              { num: "01", Icon: FaSearch, title: "Diagnostic Compute", desc: "Feed biometric and symptomatic data into our NLP engine. It outputs an exact Prakriti-Vikriti map instantly.", glow: "text-blue-500" },
-              { num: "02", Icon: FaCog, title: "Protocol Generation", desc: "The engine constructs a sequential therapy timeline. Purva to Paschat Karma, algorithmically balanced for safety.", glow: "text-purple-500" },
-              { num: "03", Icon: FaChartLine, title: "Execution & Telemetry", desc: "Live tracking during clinic visits. Practitioner nodes update status while patient dashboards reflect real-time yield.", glow: "text-emerald-500" },
+              { num: "01", Icon: FaSearch, title: "Personalized Diagnosis", desc: "Our doctors evaluate your health and symptomatic data to instantly chart a clear Prakriti-Vikriti map of your body.", glow: "text-blue-500" },
+              { num: "02", Icon: FaCog, title: "Therapy Planning", desc: "A tailored step-by-step treatment timeline is generated for you. Your treatments are scheduled for maximum recovery.", glow: "text-purple-500" },
+              { num: "03", Icon: FaChartLine, title: "Execution & Progress", desc: "Live tracking via your portal. Doctors update your status while your dashboard reflects real-time health improvements.", glow: "text-emerald-500" },
             ].map((s, i) => (
               <div key={s.num} className="relative pt-12 text-center group">
                 <div className="mx-auto w-24 h-24 bg-stone-950 rounded-2xl flex items-center justify-center border border-stone-800 shadow-[0_0_30px_rgba(0,0,0,0.5)] mb-8 relative z-10 group-hover:-translate-y-2 transition-transform duration-500">
@@ -342,20 +342,20 @@ const Landing = () => {
             {/* Copy */}
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-bold uppercase tracking-widest mb-6">
-                <FaRobot className="w-3 h-3" /> Neural Backbone
+                <FaRobot className="w-3 h-3" /> Smart Platform
               </div>
               <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-8">
-                Silicon-based intelligence. <br/>Carbon-based wellness.
+                Modern Technology. <br/>Natural Healing.
               </h2>
               <p className="text-stone-400 text-lg leading-relaxed mb-10 font-medium">
-                AyurCare isn't just a booking platform. It's an entire Operating System for clinical Ayurveda, leveraging predictive models to dramatically improve patient outcomes and clinic efficiency.
+                AyurCare isn't just a basic booking platform. It's a comprehensive platform for clinical Ayurveda, designed to dramatically improve patient outcomes by seamlessly connecting doctors and patients.
               </p>
               
               <div className="space-y-6">
                 {[
-                  { title: "Predictive Vitals Engine", desc: "Correlates historical dosha data against current metrics to predict therapeutic crises." },
-                  { title: "Dynamic Resource Allocation", desc: "Automatically maps therapy rooms and medicine inventory against incoming patient loads." },
-                  { title: "Immutable Audit Trails", desc: "Every consultation, prescription, and therapy step is crytographically logged for compliance." }
+                  { title: "Personalized Health Tracking", desc: "Correlates your historical wellness data against current metrics to optimize your ongoing treatments." },
+                  { title: "Seamless Appointments", desc: "Automatically manages clinic schedules and rooms so your consultations are always on time." },
+                  { title: "Secure Health Records", desc: "Every consultation, prescription, and therapy step is securely logged to guarantee your privacy." }
                 ].map((f, i) => (
                    <div key={i} className="flex items-start gap-4">
                      <div className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
@@ -371,7 +371,7 @@ const Landing = () => {
 
               <div className="mt-12 pt-8 border-t border-stone-800">
                 <Link to="/register" className="inline-flex items-center gap-3 text-sm font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-colors group">
-                   Initialize Workspace <FaArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                   Get Started Today <FaArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </div>
             </div>
@@ -401,8 +401,8 @@ const Landing = () => {
                
                <div className="absolute bottom-8 left-8 right-8 bg-stone-950/80 backdrop-blur-md border border-stone-800 rounded-2xl p-5 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-stone-500 mb-1">System Status</p>
-                    <p className="text-white font-black text-sm">Engine Operational</p>
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-stone-500 mb-1">Patient Dashboard</p>
+                    <p className="text-white font-black text-sm">Ready for Consult</p>
                   </div>
                   <div className="flex gap-1.5">
                      {[1,2,3,4,5].map(i => (
@@ -422,17 +422,17 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 border border-stone-700 text-stone-300 text-[10px] font-bold uppercase tracking-widest mb-6">
-              <FaShieldAlt className="w-3 h-3" /> Enterprise Infrastructure
+              <FaShieldAlt className="w-3 h-3" /> For Everyone
             </div>
-            <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-6">Built for every node.</h2>
-            <p className="text-stone-400 text-lg">Massive multi-tenant architecture serving patients, practitioners, and clinical directors seamlessly.</p>
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-6">Built for your needs.</h2>
+            <p className="text-stone-400 text-lg">A unified platform seamlessly connecting patients, doctors, and clinical directors in one place.</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
             {[
-              { role: "Identity: Patient", Icon: FaUser, accent: "emerald", title: "Consumer Portal", desc: "Your personal health ledger.", features: ["Execute therapy bookings", "Consume ML dosing plans", "Track biomarker metrics", "Digital prescription vault"] },
-              { role: "Identity: Doctor", Icon: FaUserMd, accent: "amber", title: "Clinical Terminal", desc: "The practitioner's command center.", features: ["Author treatment logic", "Push therapy updates", "Ingest patient vitals", "Override AI suggestions"] },
-              { role: "Identity: Admin", Icon: FaCog, accent: "purple", title: "Superuser Console", desc: "Full hospital oversight.", features: ["Hardware & room routing", "Inventory supply chains", "Staff credentialing", "Aggregated financial BI"] },
+              { role: "Patient", Icon: FaUser, accent: "emerald", title: "Patient Portal", desc: "Your personal health companion.", features: ["Book therapy sessions", "View personalized plans", "Track health metrics", "Digital prescriptions"] },
+              { role: "Doctor", Icon: FaUserMd, accent: "amber", title: "Doctor Dashboard", desc: "The practitioner's workspace.", features: ["Create treatment plans", "Manage appointments", "Review patient health", "Track clinical progress"] },
+              { role: "Administrator", Icon: FaCog, accent: "purple", title: "Admin Portal", desc: "Full hospital oversight.", features: ["Manage clinic rooms", "Track medicine inventory", "Manage hospital staff", "View financial reports"] },
             ].map((r, i) => {
               const bgColors = {
                  emerald: "bg-emerald-500/10",
@@ -488,14 +488,14 @@ const Landing = () => {
             Stop booking. <br/>Start healing.
           </h2>
           <p className="text-stone-300 text-lg mb-12 max-w-xl mx-auto font-medium">
-            Boot up the most strictly compiled Ayurvedic network available. Create your namespace inside AyurCare today.
+            Join the most comprehensive Ayurvedic wellness platform. Create your AyurCare account today.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link to="/register" className="w-full sm:w-auto px-10 py-5 bg-emerald-600 text-white font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-emerald-500 transition-all shadow-[0_0_40px_rgba(16,185,129,0.4)] border border-emerald-500 text-center">
-              Execute Registration
+              Create Account
             </Link>
             <Link to="/login" className="w-full sm:w-auto px-10 py-5 text-white font-black text-sm uppercase tracking-widest rounded-2xl border border-stone-600 hover:bg-stone-800 transition-all text-center">
-              Authenticate Portal
+              Log In
             </Link>
           </div>
         </div>
@@ -513,7 +513,7 @@ const Landing = () => {
                 <span className="text-white font-black text-xl tracking-tight">AyurCare<span className="text-emerald-500">.</span></span>
               </div>
               <p className="text-stone-500 text-sm leading-relaxed font-medium max-w-sm mb-8">
-                Enterprise computational architecture mapping the ancient logic of Panchakarma into digital syntax.
+                A modern platform bringing the ancient wisdom of Ayurveda to the digital age.
               </p>
               <div className="flex gap-4">
                  <div className="w-10 h-10 rounded-xl bg-stone-900 border border-stone-800 flex items-center justify-center hover:border-emerald-500/50 hover:text-emerald-400 transition-all cursor-pointer text-stone-500"><FaPhoneAlt className="w-4 h-4" /></div>
@@ -524,9 +524,9 @@ const Landing = () => {
             
             <div className="md:col-span-7 lg:col-span-8 flex flex-wrap gap-16 lg:justify-end">
                <div>
-                 <h4 className="text-stone-300 font-extrabold text-xs uppercase tracking-widest mb-6">Nodes</h4>
+                 <h4 className="text-stone-300 font-extrabold text-xs uppercase tracking-widest mb-6">Links</h4>
                  <ul className="space-y-4">
-                   {[{ label: "Initialize (Register)", to: "/register" }, { label: "Authenticate (Login)", to: "/login" }, { label: "Admin Root", to: "/login" }].map(l => (
+                   {[{ label: "Sign Up", to: "/register" }, { label: "Log In", to: "/login" }, { label: "Admin Portal", to: "/login" }].map(l => (
                      <li key={l.label}><Link to={l.to} className="text-stone-500 font-bold text-sm hover:text-emerald-400 transition-colors flex items-center gap-2"><FaArrowRight className="w-2.5 h-2.5 opacity-0 -ml-4 transition-all" /> {l.label}</Link></li>
                    ))}
                  </ul>
@@ -534,7 +534,7 @@ const Landing = () => {
                <div>
                  <h4 className="text-stone-300 font-extrabold text-xs uppercase tracking-widest mb-6">Security</h4>
                  <ul className="space-y-4">
-                   {["Data Encryption", "SOC2 Architecture", "HIPAA Logic", "Terms of Operation"].map(l => (
+                   {["Data Privacy", "Security", "Medical Compliance", "Terms of Service"].map(l => (
                      <li key={l}><a href="#" className="text-stone-500 font-bold text-sm hover:text-emerald-400 transition-colors">{l}</a></li>
                    ))}
                  </ul>
@@ -545,7 +545,7 @@ const Landing = () => {
           <div className="border-t border-stone-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-stone-600 font-bold text-xs">© {new Date().getFullYear()} AyurCare Core Systems. All Rights Reserved.</p>
             <div className="flex items-center gap-2 text-stone-600 font-bold text-xs bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800">
-               <div className="w-2 h-2 rounded-full bg-emerald-500"></div> All Systems Operational
+               <div className="w-2 h-2 rounded-full bg-emerald-500"></div> Platform Online
             </div>
           </div>
         </div>

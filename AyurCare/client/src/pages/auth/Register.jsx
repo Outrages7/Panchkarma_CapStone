@@ -8,6 +8,29 @@ import {
   clearMessage,
 } from "../../redux/slices/authSlice";
 
+const DarkInput = ({ label, name, type = "text", value, onChange, placeholder, error, min, icon: Icon, required }) => (
+  <div className="space-y-1.5 w-full">
+    <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">{label}</label>
+    <div className="relative">
+      {Icon && (
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <Icon className="w-4 h-4 text-stone-500" />
+        </div>
+      )}
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        min={min}
+        className={`w-full ${Icon ? 'pl-11' : 'pl-4'} pr-4 py-3 bg-stone-900 border ${error ? 'border-red-500/50 focus:border-red-500' : 'border-stone-800 focus:border-emerald-500/50'} rounded-xl text-white placeholder-stone-600 focus:outline-none focus:ring-0 transition-all font-medium text-sm`}
+      />
+    </div>
+    {error && <p className="text-xs text-red-400 mt-1.5 ml-1 font-medium">{error}</p>}
+  </div>
+);
+
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -171,30 +194,8 @@ const Register = () => {
     await dispatch(register(submitData));
   };
 
-  const stepLabels = ["Topology", "Identification", "Clearance"];
+  const stepLabels = ["Account Type", "Details", "Profile"];
 
-  const DarkInput = ({ label, name, type = "text", value, onChange, placeholder, error, min, icon: Icon, required }) => (
-    <div className="space-y-1.5 w-full">
-      <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">{label}</label>
-      <div className="relative">
-        {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Icon className="w-4 h-4 text-stone-500" />
-          </div>
-        )}
-        <input
-          type={type}
-          name={name}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          min={min}
-          className={`w-full ${Icon ? 'pl-11' : 'pl-4'} pr-4 py-3 bg-stone-900 border ${error ? 'border-red-500/50 focus:border-red-500' : 'border-stone-800 focus:border-emerald-500/50'} rounded-xl text-white placeholder-stone-600 focus:outline-none focus:ring-0 transition-all font-medium text-sm`}
-        />
-      </div>
-      {error && <p className="text-xs text-red-400 mt-1.5 ml-1 font-medium">{error}</p>}
-    </div>
-  );
 
   return (
     <div className="min-h-screen flex bg-stone-950 font-sans antialiased text-stone-300 selection:bg-emerald-500/30 selection:text-emerald-200">
@@ -216,27 +217,27 @@ const Register = () => {
           </Link>
           <div className="px-3 py-1 rounded-full bg-stone-950 border border-stone-800 flex items-center gap-2 shadow-inner">
              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-             <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Node Configuration</span>
+             <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Getting Started</span>
           </div>
         </div>
 
         <div className="relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-6">
-            <FaCog className="w-3 h-3" /> System Access
+            <FaCog className="w-3 h-3" /> Secure Registration
           </div>
           <h1 className="text-4xl lg:text-5xl font-extrabold text-white leading-[1.1] tracking-tight mb-6">
-            Initialize your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">Ayurvedic network.</span>
+            Create your <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">AyurCare account.</span>
           </h1>
           <p className="text-stone-400 text-base font-medium max-w-md leading-relaxed mb-10">
-            Provision an account to sync into the central therapeutic engine. Zero friction, instant HIPAA-compliant pipeline construction.
+            Join our unified platform for holistic healthcare management and personalized treatments.
           </p>
 
           <div className="space-y-4 max-w-sm">
             {[
-               { icon: FaCheckCircle, text: "Automated Dosha Computation" },
-               { icon: FaCheckCircle, text: "Longitudinal Vitals Tracking" },
-               { icon: FaCheckCircle, text: "End-to-End Cryptography" }
+               { icon: FaCheckCircle, text: "Personalized Assessments" },
+               { icon: FaCheckCircle, text: "Health Tracking & Records" },
+               { icon: FaCheckCircle, text: "Secure & Confidential" }
             ].map((f, i) => (
                <div key={i} className="flex items-center gap-3 bg-stone-950/50 backdrop-blur-sm border border-stone-800/80 rounded-xl p-4 shadow-sm">
                  <f.icon className="w-4 h-4 text-emerald-500" />
@@ -267,9 +268,9 @@ const Register = () => {
           </div>
 
           <div className="mb-10 text-center lg:text-left">
-            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Build Identity</h2>
+            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Create Account</h2>
             <p className="text-sm text-stone-400 font-medium">
-              {step === 1 ? "Select the designated network topology" : step === 2 ? "Provide cryptographic identification metrics" : "Supply final authorization clearance details"}
+              {step === 1 ? "Choose your account type" : step === 2 ? "Enter your personal details" : "Complete your profile"}
             </p>
           </div>
 
@@ -314,9 +315,9 @@ const Register = () => {
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
               <div className="space-y-4">
                 {[
-                  { role: "patient", label: "Patient Node", desc: "Book therapeutic sequences & track biometric data", Icon: FaUser, glow: "group-hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]", color: "text-emerald-400" },
-                  { role: "doctor", label: "Practitioner Node", desc: "Manage patient queues, chart analysis, and logic overrides", Icon: FaUserMd, glow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]", color: "text-amber-400" },
-                  { role: "admin", label: "Admin Root", desc: "Hospital infrastructure routing and logistics telemetry", Icon: FaCog, glow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]", color: "text-purple-400" },
+                  { role: "patient", label: "Patient", desc: "Book appointments and track your health", Icon: FaUser, glow: "group-hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]", color: "text-emerald-400" },
+                  { role: "doctor", label: "Doctor", desc: "Manage patients, appointments, and medical records", Icon: FaUserMd, glow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]", color: "text-amber-400" },
+                  { role: "admin", label: "Administrator", desc: "Manage hospital operations and platform settings", Icon: FaCog, glow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]", color: "text-purple-400" },
                 ].map(r => (
                   <button
                     key={r.role}
@@ -337,14 +338,14 @@ const Register = () => {
 
               <div className="pt-6 border-t border-stone-800/50 mt-10 text-center flex flex-col gap-4">
                 <p className="text-sm font-medium text-stone-500">
-                  Network identity acquired?{" "}
+                  Already have an account?{" "}
                   <Link to="/login" className="font-bold text-white hover:text-emerald-400 transition-colors ml-1">
-                    Authenticate Session
+                    Log In
                   </Link>
                 </p>
                 <div className="flex justify-center">
                   <Link to="/" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-stone-900 border border-transparent hover:border-stone-800">
-                    <FaArrowLeft className="w-2.5 h-2.5" /> Terminate Link
+                    <FaArrowLeft className="w-2.5 h-2.5" /> Back to Home
                   </Link>
                 </div>
               </div>
@@ -355,14 +356,14 @@ const Register = () => {
           {step === 2 && (
             <form className="space-y-5 animate-in slide-in-from-right-8 duration-500">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <DarkInput label="Given Name" name="firstName" value={formData.firstName} onChange={handleChange} error={formErrors.firstName} icon={FaAddressCard} />
-                <DarkInput label="Surname" name="lastName" value={formData.lastName} onChange={handleChange} error={formErrors.lastName} icon={FaAddressCard} />
+                <DarkInput label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} error={formErrors.firstName} icon={FaAddressCard} />
+                <DarkInput label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} error={formErrors.lastName} icon={FaAddressCard} />
               </div>
-              <DarkInput label="Communication Vector" type="email" name="email" value={formData.email} onChange={handleChange} error={formErrors.email} placeholder="identity@domain.com" icon={FaEnvelope} />
-              <DarkInput label="Audio Node" type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="10 Digit Number" error={formErrors.phone} icon={FaPhoneAlt} />
+              <DarkInput label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} error={formErrors.email} placeholder="name@domain.com" icon={FaEnvelope} />
+              <DarkInput label="Phone Number" type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="10 Digit Number" error={formErrors.phone} icon={FaPhoneAlt} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <DarkInput label="Cryptographic Key" type="password" name="password" value={formData.password} onChange={handleChange} error={formErrors.password} icon={FaLock} placeholder="••••••••" />
-                <DarkInput label="Verify Key" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} error={formErrors.confirmPassword} icon={FaLock} placeholder="••••••••" />
+                <DarkInput label="Password" type="password" name="password" value={formData.password} onChange={handleChange} error={formErrors.password} icon={FaLock} placeholder="••••••••" />
+                <DarkInput label="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} error={formErrors.confirmPassword} icon={FaLock} placeholder="••••••••" />
               </div>
 
               <div className="flex gap-4 pt-6 mt-4">
@@ -378,7 +379,7 @@ const Register = () => {
                   onClick={handleNext}
                   className="w-2/3 px-6 py-4 text-sm font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500 transition"
                 >
-                  Establish Telemetry
+                  Continue
                 </button>
               </div>
             </form>
@@ -391,11 +392,11 @@ const Register = () => {
                 <div className="space-y-5 border border-stone-800 bg-stone-900/50 p-6 rounded-2xl">
                   <div className="flex items-center gap-3 mb-2">
                      <FaUserTag className="text-emerald-500 w-5 h-5" />
-                     <h4 className="text-white font-black">Patient Classification Parameters</h4>
+                     <h4 className="text-white font-black">Patient Details</h4>
                   </div>
-                  <DarkInput label="Date of Activation" type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} error={formErrors.dateOfBirth} icon={FaBirthdayCake} />
+                  <DarkInput label="Date of Birth" type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} error={formErrors.dateOfBirth} icon={FaBirthdayCake} />
                   <div className="space-y-1.5 w-full">
-                    <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Biological Identity</label>
+                    <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Gender</label>
                     <div className="relative">
                       <select
                         name="gender"
@@ -403,10 +404,10 @@ const Register = () => {
                         onChange={handleChange}
                         className={`w-full px-4 py-3 bg-stone-900 border ${formErrors.gender ? 'border-red-500/50 focus:border-red-500' : 'border-stone-800 focus:border-emerald-500/50'} rounded-xl text-white appearance-none focus:outline-none focus:ring-0 transition-all font-medium text-sm drop-shadow-sm`}
                       >
-                        <option value="" className="text-stone-500">Select bio-metric state</option>
+                        <option value="" className="text-stone-500">Select your gender</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
-                        <option value="other">Other Sequence</option>
+                        <option value="other">Other</option>
                       </select>
                       <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
                          <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -421,10 +422,10 @@ const Register = () => {
                 <div className="space-y-5 border border-stone-800 bg-stone-900/50 p-6 rounded-2xl">
                   <div className="flex items-center gap-3 mb-2">
                      <FaStethoscope className="text-amber-500 w-5 h-5" />
-                     <h4 className="text-white font-black">Practitioner Credentials</h4>
+                     <h4 className="text-white font-black">Doctor Details</h4>
                   </div>
                   <div className="space-y-1.5 w-full">
-                    <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Medical Domain Mastery</label>
+                    <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Specialization</label>
                     <div className="relative">
                       <select
                         name="specialization"
@@ -432,7 +433,7 @@ const Register = () => {
                         onChange={handleChange}
                         className={`w-full px-4 py-3 bg-stone-900 border ${formErrors.specialization ? 'border-red-500/50 focus:border-red-500' : 'border-stone-800 focus:border-emerald-500/50'} rounded-xl text-white appearance-none focus:outline-none focus:ring-0 transition-all font-medium text-sm`}
                       >
-                        <option value="">Awaiting specialization mapping...</option>
+                        <option value="">Select your specialization</option>
                         <option value="Cardiology">Cardiology</option>
                         <option value="Dermatology">Dermatology</option>
                         <option value="Endocrinology">Endocrinology</option>
@@ -455,10 +456,10 @@ const Register = () => {
                     </div>
                     {formErrors.specialization && <p className="text-xs text-red-400 mt-1.5 ml-1 font-medium">{formErrors.specialization}</p>}
                   </div>
-                  <DarkInput label="License Metric" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} placeholder="MD-123456" error={formErrors.licenseNumber} icon={FaIdCard} />
+                  <DarkInput label="License Number" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} placeholder="MD-123456" error={formErrors.licenseNumber} icon={FaIdCard} />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <DarkInput label="Field Experience (Yrs)" type="number" name="experience" value={formData.experience} onChange={handleChange} min="0" error={formErrors.experience} icon={FaClock} />
-                    <DarkInput label="Monetary Exchange (₹)" type="number" name="consultationFee" value={formData.consultationFee} onChange={handleChange} placeholder="500" min="0" error={formErrors.consultationFee} />
+                    <DarkInput label="Years of Experience" type="number" name="experience" value={formData.experience} onChange={handleChange} min="0" error={formErrors.experience} icon={FaInfoCircle} />
+                    <DarkInput label="Consultation Fee (₹)" type="number" name="consultationFee" value={formData.consultationFee} onChange={handleChange} placeholder="500" min="0" error={formErrors.consultationFee} />
                   </div>
                 </div>
               )}
@@ -467,9 +468,9 @@ const Register = () => {
                 <div className="space-y-5 border border-stone-800 bg-stone-900/50 p-6 rounded-2xl">
                   <div className="flex items-center gap-3 mb-2">
                      <FaBuilding className="text-purple-500 w-5 h-5" />
-                     <h4 className="text-white font-black">Administrative Root Access</h4>
+                     <h4 className="text-white font-black">Admin Details</h4>
                   </div>
-                  <DarkInput label="Operational Sector" name="department" value={formData.department} onChange={handleChange} placeholder="IT / Logistics / Medical" error={formErrors.department} />
+                  <DarkInput label="Department" name="department" value={formData.department} onChange={handleChange} placeholder="IT / Logistics / Medical" error={formErrors.department} />
                 </div>
               )}
 
@@ -492,10 +493,10 @@ const Register = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Injecting...
+                      Creating Account...
                     </>
                   ) : (
-                    "Authorize Credentials"
+                    "Create Account"
                   )}
                 </button>
               </div>
@@ -505,7 +506,7 @@ const Register = () => {
           {/* Registration Disclaimer */}
           <div className="mt-10 text-center relative z-20">
              <p className="text-[10px] uppercase tracking-widest text-stone-600 font-bold max-w-xs mx-auto">
-               By authorizing credentials, you agree to the AyurCare clinical protocols, HIPAA constraints, and operational directives.
+               By creating an account, you agree to our Terms of Service and Privacy Policy.
              </p>
           </div>
 

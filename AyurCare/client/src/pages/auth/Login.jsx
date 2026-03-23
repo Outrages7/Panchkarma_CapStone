@@ -23,6 +23,8 @@ const Login = () => {
     if (isAuthenticated && user) {
       const dashboardRoutes = {
         patient: "/patient/dashboard",
+        doctor: "/doctor/dashboard",
+        admin: "/admin/dashboard",
       };
       navigate(dashboardRoutes[user.role] || "/");
     }
@@ -63,6 +65,8 @@ const Login = () => {
       const role = result.payload.data.user.role;
       const dashboardRoutes = {
         patient: "/patient/dashboard",
+        doctor: "/doctor/dashboard",
+        admin: "/admin/dashboard",
       };
       navigate(dashboardRoutes[role] || "/");
     }
@@ -87,20 +91,20 @@ const Login = () => {
           </Link>
           <div className="px-3 py-1 rounded-full bg-stone-950 border border-stone-800 flex items-center gap-2 shadow-inner">
              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-             <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">System Online</span>
+             <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Secure Network</span>
           </div>
         </div>
 
         <div className="relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-6">
-            <FaCheckCircle className="w-3 h-3" /> Secure Gateway
+            <FaCheckCircle className="w-3 h-3" /> Secure Login
           </div>
           <h1 className="text-4xl lg:text-5xl font-extrabold text-white leading-[1.1] tracking-tight mb-6">
-            Log in to your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">clinical workspace.</span>
+            Welcome back to <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">AyurCare.</span>
           </h1>
           <p className="text-stone-400 text-base font-medium max-w-md leading-relaxed mb-10">
-            Access automated dosha tracking, longitudinal telemetry timelines, and algorithm-assisted therapeutic routines.
+            Access your personalized Ayurvedic health records, manage appointments, and track your wellness journey.
           </p>
 
           <div className="bg-stone-950/50 backdrop-blur-sm border border-stone-800 rounded-2xl p-5 max-w-sm">
@@ -109,8 +113,8 @@ const Login = () => {
                   <FaLeaf className="w-4 h-4 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-white font-bold text-sm">Panchakarma Protocol</p>
-                  <p className="text-stone-500 text-xs mt-0.5">End-to-End Encrypted</p>
+                  <p className="text-white font-bold text-sm">Secure Connection</p>
+                  <p className="text-stone-500 text-xs mt-0.5">Your data is fully encrypted</p>
                 </div>
              </div>
              <div className="h-1.5 w-full bg-stone-900 rounded-full overflow-hidden">
@@ -140,8 +144,8 @@ const Login = () => {
           </div>
 
           <div className="mb-10 text-center lg:text-left">
-            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Initialize Session</h2>
-            <p className="text-sm text-stone-400 font-medium">Identify yourself to authenticate connection metrics.</p>
+            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Sign In</h2>
+            <p className="text-sm text-stone-400 font-medium">Please sign in to access your AyurCare account.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -153,7 +157,7 @@ const Login = () => {
             )}
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Identity Vector (Email)</label>
+              <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Email Address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                    <FaEnvelope className="w-4 h-4 text-stone-500" />
@@ -172,8 +176,8 @@ const Login = () => {
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center px-1">
-                <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest">Cryptographic Key (Password)</label>
-                <Link to="/forgot-password" className="text-[11px] font-bold text-emerald-500 hover:text-emerald-400 transition-colors uppercase tracking-widest">Recover Key</Link>
+                <label className="block text-xs font-bold text-stone-400 uppercase tracking-widest">Password</label>
+                <Link to="/forgot-password" className="text-[11px] font-bold text-emerald-500 hover:text-emerald-400 transition-colors uppercase tracking-widest">Forgot Password?</Link>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -202,21 +206,21 @@ const Login = () => {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
               ) : null}
-              {loading ? "Establishing Handshake..." : "Authenticate"}
+              {loading ? "Signing In..." : "Sign In"}
             </button>
 
             <div className="mt-10 pt-8 border-t border-stone-800/80 text-center">
               <p className="text-sm font-medium text-stone-500">
-                Lacking credentials?{" "}
+                Don't have an account?{" "}
                 <Link to="/register" className="font-bold text-white hover:text-emerald-400 transition-colors ml-1">
-                  Establish an identity
+                  Sign up
                 </Link>
               </p>
             </div>
 
             <div className="text-center mt-6">
               <Link to="/" className="inline-flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-stone-600 hover:text-stone-400 transition-colors py-2 px-4 rounded-lg hover:bg-stone-900 border border-transparent hover:border-stone-800">
-                <FaArrowLeft className="w-2.5 h-2.5" /> Abort & Return
+                <FaArrowLeft className="w-2.5 h-2.5" /> Back to Home
               </Link>
             </div>
           </form>

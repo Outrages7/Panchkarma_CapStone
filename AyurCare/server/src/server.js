@@ -6,6 +6,8 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import doctorRoutes from './routes/doctorRoutes.js';
 import patientRoutes from './routes/patientRoutes.js';
 import therapyTypeRoutes from './routes/therapyTypeRoutes.js';
 import treatmentPlanRoutes from './routes/treatmentPlanRoutes.js';
@@ -107,6 +109,8 @@ app.get('/api/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/doctor', doctorRoutes);
 app.use('/api/patient', patientRoutes);
 
 // AyurCare new routes
