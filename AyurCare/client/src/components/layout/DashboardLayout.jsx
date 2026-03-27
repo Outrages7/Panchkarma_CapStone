@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
-import { FaBell, FaSearch } from "react-icons/fa";
+import NotificationPanel from "./NotificationPanel";
+import SessionFollowUp from "./SessionFollowUp";
+import { FaSearch } from "react-icons/fa";
 
 const DashboardLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,11 +37,7 @@ const DashboardLayout = ({ children }) => {
 
             {/* Right Actions */}
             <div className="flex items-center gap-4 ml-auto">
-              <button className="relative p-2.5 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors">
-                <FaBell className="w-4 h-4" />
-                {/* Notification Badge */}
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
-              </button>
+              <NotificationPanel />
             </div>
           </div>
         </header>
@@ -49,6 +47,9 @@ const DashboardLayout = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* Session follow-up popups/banners */}
+      <SessionFollowUp />
     </div>
   );
 };

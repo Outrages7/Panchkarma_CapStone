@@ -112,6 +112,18 @@ const userSchema = new mongoose.Schema(
     // Doctor-specific fields
     specialization: {
       type: String,
+      enum: [
+        'kayachikitsa',
+        'panchakarma',
+        'shalya_tantra',
+        'shalakya_tantra',
+        'kaumarabhritya',
+        'agada_tantra',
+        'rasayana',
+        'vajikarana',
+        'dravyaguna',
+        'manas_roga',
+      ],
       required: function () {
         return this.role === 'doctor';
       },

@@ -130,7 +130,7 @@ const TherapyProgress = () => {
                         max="100"
                         value={scoreForm[f.key]}
                         onChange={e => setScoreForm(s => ({ ...s, [f.key]: e.target.value }))}
-                        className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                        className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 accent-emerald-600"
                         required={f.key === "overallScore"}
                       />
                     </div>
@@ -143,7 +143,7 @@ const TherapyProgress = () => {
                     value={scoreForm.notes}
                     onChange={e => setScoreForm(s => ({ ...s, notes: e.target.value }))}
                     placeholder="How are you feeling today?"
-                    className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 accent-emerald-600"
                   />
                 </div>
                 <div className="flex gap-3">

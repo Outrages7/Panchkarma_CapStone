@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import Button from '../../components/common/Button';
-import { useToast } from '../../hooks/useToast';
-import { ToastContainer } from '../../components/common/Toast';
-import { formatName } from '../../utils/formatters';
 import api from '../../services/api';
+import { getSpecializationLabel } from '../../utils/specializations';
+import {
+  FaPaperPlane,
+  FaCommentMedical,
+  FaSync,
+  FaUserMd,
+  FaUser,
+  FaCheck,
+  FaCheckDouble,
+} from 'react-icons/fa';
 
 const Messages = () => {
   const { user } = useSelector((state) => state.auth);
   const isDoctor = user?.role === 'doctor';
-  const { toasts, toast, removeToast } = useToast();
 
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -18,6 +23,7 @@ const Messages = () => {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const messagesEndRef = useRef(null);
 
   // Fetch conversations on mount
   useEffect(() => {
@@ -31,6 +37,20 @@ const Messages = () => {
     }
   }, [selectedConversation]);
 
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Poll for new messages every 10 seconds
+  useEffect(() => {
+    if (!selectedConversation) return;
+    const interval = setInterval(() => {
+      fetchMessages(selectedConversation._id);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [selectedConversation]);
+
   const fetchConversations = async () => {
     try {
       setLoading(true);
@@ -38,8 +58,7 @@ const Messages = () => {
       const response = await api.get(endpoint);
       setConversations(response.data.data || []);
     } catch (error) {
-      toast.error('Failed to load conversations');
-      console.error(error);
+      console.error('Failed to load conversations:', error);
     } finally {
       setLoading(false);
     }
@@ -53,8 +72,7 @@ const Messages = () => {
       const response = await api.get(endpoint);
       setMessages(response.data.data || []);
     } catch (error) {
-      toast.error('Failed to load messages');
-      console.error(error);
+      console.error('Failed to load messages:', error);
     }
   };
 
@@ -74,15 +92,11 @@ const Messages = () => {
         text: messageText,
       });
 
-      // Add message to local state
       setMessages((prev) => [...prev, response.data.data]);
       setMessageText('');
-
-      // Refresh conversations to update last message
       fetchConversations();
     } catch (error) {
-      toast.error(error.response?.data?.error?.message || 'Failed to send message');
-      console.error(error);
+      console.error('Failed to send message:', error);
     } finally {
       setSendingMessage(false);
     }
@@ -92,23 +106,30 @@ const Messages = () => {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-
-    if (hours < 1) {
-      const minutes = Math.floor(diff / (1000 * 60));
-      return `${minutes}m ago`;
-    }
-    if (hours < 24) {
-      return `${hours}h ago`;
-    }
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const minutes = Math.floor(diff / (1000 * 60));
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
   };
 
   const formatMessageTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
+    return new Date(timestamp).toLocaleTimeString('en-IN', {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const formatMessageDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return date.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
   const getParticipant = (conversation) => {
@@ -116,229 +137,261 @@ const Messages = () => {
   };
 
   const getUnreadCount = (conversation) => {
-    return isDoctor ? conversation.unreadCount.doctor : conversation.unreadCount.patient;
+    return isDoctor ? conversation.unreadCount?.doctor || 0 : conversation.unreadCount?.patient || 0;
   };
+
+  // Group messages by date
+  const groupedMessages = messages.reduce((groups, msg) => {
+    const dateKey = new Date(msg.createdAt).toDateString();
+    if (!groups[dateKey]) groups[dateKey] = [];
+    groups[dateKey].push(msg);
+    return groups;
+  }, {});
 
   return (
     <DashboardLayout>
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      {/* Page Header */}
+      <div className="bg-stone-950 rounded-[2rem] p-8 md:p-10 shadow-lg relative overflow-hidden flex flex-col md:flex-row md:items-end justify-between gap-6 border border-stone-800 border-b-emerald-600 border-b-4 mb-8 mt-2">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="p-4 bg-emerald-600 rounded-2xl shadow-sm border border-emerald-500/50 hidden sm:block">
+            <FaCommentMedical className="text-2xl text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">
+              Messages
+            </h1>
+            <p className="text-stone-400 font-medium">
+              {isDoctor ? 'Communicate with your patients securely' : 'Chat with your doctors directly'}
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow h-[calc(100vh-12rem)]">
-          <div className="flex h-full">
+      {/* Chat Container */}
+      <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden" style={{ height: 'calc(100vh - 20rem)' }}>
+        <div className="flex h-full">
+          {/* Conversations Sidebar */}
+          <div className={`w-full md:w-[340px] border-r border-stone-200 flex flex-col bg-stone-50/50 ${selectedConversation ? 'hidden md:flex' : 'flex'}`}>
+            {/* Sidebar Header */}
+            <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between">
+              <h2 className="text-sm font-extrabold text-stone-900 uppercase tracking-wider">Conversations</h2>
+              <button
+                onClick={fetchConversations}
+                className="p-2 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-xl transition-colors"
+              >
+                <FaSync className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             {/* Conversations List */}
-            <div className="w-full md:w-1/3 border-r border-gray-200 flex flex-col">
-              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
-                <Button onClick={fetchConversations} variant="outline" size="sm">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                </Button>
-              </div>
+            <div className="flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-stone-400"></div>
+                </div>
+              ) : conversations.length > 0 ? (
+                conversations.map((conversation) => {
+                  const participant = getParticipant(conversation);
+                  const unreadCount = getUnreadCount(conversation);
+                  const isSelected = selectedConversation?._id === conversation._id;
 
-              <div className="flex-1 overflow-y-auto">
-                {loading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : conversations.length > 0 ? (
-                  conversations.map((conversation) => {
-                    const participant = getParticipant(conversation);
-                    const unreadCount = getUnreadCount(conversation);
-
-                    return (
-                      <button
-                        key={conversation._id}
-                        onClick={() => setSelectedConversation(conversation)}
-                        className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors text-left ${
-                          selectedConversation?._id === conversation._id ? 'bg-blue-50' : ''
-                        }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className="w-12 h-12 bg-emerald-700 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                            {participant.firstName.charAt(0)}
-                            {participant.lastName.charAt(0)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="font-medium text-gray-900 truncate">
-                                {isDoctor ? '' : 'Dr. '}
-                                {formatName(participant)}
-                              </p>
+                  return (
+                    <button
+                      key={conversation._id}
+                      onClick={() => setSelectedConversation(conversation)}
+                      className={`w-full px-5 py-4 border-b border-stone-100 hover:bg-white transition-colors text-left ${
+                        isSelected ? 'bg-emerald-50/60 border-l-4 border-l-emerald-500' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                          isSelected
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-stone-200 text-stone-600'
+                        }`}>
+                          {participant?.firstName?.charAt(0)}{participant?.lastName?.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`font-bold text-sm truncate ${isSelected ? 'text-emerald-800' : 'text-stone-800'}`}>
+                              {isDoctor ? '' : 'Dr. '}
+                              {participant?.firstName} {participant?.lastName}
+                            </p>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {conversation.lastMessage?.timestamp && (
+                                <span className="text-[10px] font-semibold text-stone-400 uppercase">
+                                  {formatTimestamp(conversation.lastMessage.timestamp)}
+                                </span>
+                              )}
                               {unreadCount > 0 && (
-                                <span className="bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                                <span className="min-w-[20px] h-5 flex items-center justify-center bg-emerald-500 text-white text-[10px] font-black rounded-full px-1.5">
                                   {unreadCount}
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-gray-600 truncate mt-1">
-                              {conversation.lastMessage?.text || 'No messages yet'}
-                            </p>
-                            {conversation.lastMessage?.timestamp && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {formatTimestamp(conversation.lastMessage.timestamp)}
-                              </p>
+                          </div>
+                          <p className="text-xs text-stone-500 truncate mt-0.5 font-medium">
+                            {!isDoctor && participant?.specialization && (
+                              <span className="text-stone-400">{getSpecializationLabel(participant.specialization)} · </span>
                             )}
-                          </div>
+                            {conversation.lastMessage?.text || 'No messages yet'}
+                          </p>
                         </div>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="text-center py-12">
-                    <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No conversations</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {isDoctor
-                        ? 'Conversations with patients will appear here'
-                        : 'Start a conversation with your doctor'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Message Thread */}
-            <div className="flex-1 flex flex-col">
-              {selectedConversation ? (
-                <>
-                  {/* Thread Header */}
-                  <div className="p-4 border-b border-gray-200">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-emerald-700 rounded-full flex items-center justify-center text-white font-bold">
-                        {getParticipant(selectedConversation).firstName.charAt(0)}
-                        {getParticipant(selectedConversation).lastName.charAt(0)}
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {isDoctor ? '' : 'Dr. '}
-                          {formatName(getParticipant(selectedConversation))}
-                        </h3>
-                        <p className="text-sm text-gray-500 capitalize">
-                          {isDoctor ? 'Patient' : getParticipant(selectedConversation).specialization || 'Doctor'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {messages.length > 0 ? (
-                      messages.map((message) => {
-                        const isMyMessage = message.sender._id === user._id;
-
-                        return (
-                          <div
-                            key={message._id}
-                            className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-md px-4 py-2 rounded-lg ${
-                                isMyMessage
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-gray-100 text-gray-900'
-                              }`}
-                            >
-                              <p className="text-sm">{message.text}</p>
-                              <p
-                                className={`text-xs mt-1 ${
-                                  isMyMessage ? 'text-blue-100' : 'text-gray-500'
-                                }`}
-                              >
-                                {formatMessageTime(message.createdAt)}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">No messages yet. Start the conversation!</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Message Input */}
-                  <div className="p-4 border-t border-gray-200">
-                    <div className="flex space-x-3">
-                      <input
-                        type="text"
-                        value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && !sendingMessage && handleSendMessage()}
-                        placeholder="Type your message..."
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        disabled={sendingMessage}
-                      />
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={!messageText.trim() || sendingMessage}
-                        loading={sendingMessage}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                          />
-                        </svg>
-                      </Button>
-                    </div>
-                  </div>
-                </>
+                    </button>
+                  );
+                })
               ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No conversation selected</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Choose a conversation from the list to start messaging
-                    </p>
+                <div className="text-center py-16 px-6">
+                  <div className="w-14 h-14 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FaCommentMedical className="w-6 h-6 text-stone-300" />
                   </div>
+                  <h3 className="text-sm font-bold text-stone-800 mb-1">No conversations</h3>
+                  <p className="text-xs text-stone-500 font-medium">
+                    {isDoctor
+                      ? 'Patient conversations will appear here'
+                      : 'Book an appointment to start messaging your doctor'}
+                  </p>
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Message Thread */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {selectedConversation ? (
+              <>
+                {/* Thread Header */}
+                <div className="px-6 py-4 border-b border-stone-200 bg-white flex items-center gap-3">
+                  {/* Mobile back button */}
+                  <button
+                    onClick={() => setSelectedConversation(null)}
+                    className="md:hidden p-2 -ml-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                    {getParticipant(selectedConversation)?.firstName?.charAt(0)}
+                    {getParticipant(selectedConversation)?.lastName?.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-stone-900 text-sm">
+                      {isDoctor ? '' : 'Dr. '}
+                      {getParticipant(selectedConversation)?.firstName}{' '}
+                      {getParticipant(selectedConversation)?.lastName}
+                    </h3>
+                    <p className="text-xs font-semibold text-stone-400 flex items-center gap-1.5">
+                      {isDoctor ? (
+                        <><FaUser className="w-2.5 h-2.5" /> Patient</>
+                      ) : (
+                        <><FaUserMd className="w-2.5 h-2.5" /> {getSpecializationLabel(getParticipant(selectedConversation)?.specialization) || 'Doctor'}</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto px-6 py-5 bg-stone-50/30">
+                  {messages.length > 0 ? (
+                    Object.entries(groupedMessages).map(([dateKey, msgs]) => (
+                      <div key={dateKey}>
+                        {/* Date separator */}
+                        <div className="flex items-center justify-center my-5">
+                          <div className="bg-stone-200/60 text-stone-500 text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
+                            {formatMessageDate(msgs[0].createdAt)}
+                          </div>
+                        </div>
+
+                        {msgs.map((message) => {
+                          const isMyMessage = message.sender?._id === user?._id || message.sender === user?._id;
+                          return (
+                            <div
+                              key={message._id}
+                              className={`flex mb-3 ${isMyMessage ? 'justify-end' : 'justify-start'}`}
+                            >
+                              <div className={`max-w-[70%] ${isMyMessage ? 'order-2' : 'order-1'}`}>
+                                <div
+                                  className={`px-4 py-2.5 rounded-2xl text-sm font-medium leading-relaxed ${
+                                    isMyMessage
+                                      ? 'bg-emerald-600 text-white rounded-br-md'
+                                      : 'bg-white text-stone-800 border border-stone-200 rounded-bl-md shadow-sm'
+                                  }`}
+                                >
+                                  {message.text}
+                                </div>
+                                <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
+                                  <span className="text-[10px] font-semibold text-stone-400">
+                                    {formatMessageTime(message.createdAt)}
+                                  </span>
+                                  {isMyMessage && (
+                                    message.isRead
+                                      ? <FaCheckDouble className="w-2.5 h-2.5 text-emerald-500" />
+                                      : <FaCheck className="w-2.5 h-2.5 text-stone-400" />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <div className="w-14 h-14 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                          <FaCommentMedical className="w-6 h-6 text-stone-300" />
+                        </div>
+                        <p className="text-sm font-semibold text-stone-400">No messages yet</p>
+                        <p className="text-xs text-stone-400 mt-0.5">Start the conversation!</p>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Message Input */}
+                <div className="px-5 py-4 border-t border-stone-200 bg-white">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && !sendingMessage && handleSendMessage()}
+                      placeholder="Type your message..."
+                      className="flex-1 px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-colors"
+                      disabled={sendingMessage}
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!messageText.trim() || sendingMessage}
+                      className="p-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-500 disabled:opacity-40 disabled:bg-stone-300 transition-colors shadow-sm"
+                    >
+                      {sendingMessage ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      ) : (
+                        <FaPaperPlane className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center bg-stone-50/30">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FaCommentMedical className="w-7 h-7 text-stone-300" />
+                  </div>
+                  <h3 className="text-sm font-bold text-stone-800 mb-1">Select a conversation</h3>
+                  <p className="text-xs text-stone-500 font-medium">
+                    Choose a conversation from the list to start messaging
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

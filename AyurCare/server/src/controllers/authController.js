@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import User from "../models/User.js";
 import { generateTokens, verifyRefreshToken } from "../utils/generateToken.js";
+import { notifyNewDoctorRegistered } from "../utils/notificationService.js";
 
 /**
  * @desc    Register new user
@@ -74,6 +75,11 @@ export const register = async (req, res, next) => {
         accessToken,
       },
     });
+
+    // Notify admins if a new doctor registered
+    if (user.role === 'doctor') {
+      notifyNewDoctorRegistered({ doctor: user }).catch(() => {});
+    }
   } catch (error) {
     next(error);
   }
@@ -243,10 +249,21 @@ export const forgotPassword = async (req, res, next) => {
     user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
+    // Send reset email
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
+
+    const { sendResetPasswordEmail } = await import("../utils/notificationService.js");
+    await sendResetPasswordEmail({
+      to: user.email,
+      userName: user.firstName,
+      resetUrl,
+    });
+
     res.status(200).json({
       success: true,
       message:
-        "Password reset token generated. Check with admin for reset link.",
+        "If an account exists with this email, a password reset link has been sent.",
     });
   } catch (error) {
     next(error);

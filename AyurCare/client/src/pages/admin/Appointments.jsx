@@ -7,10 +7,12 @@ import DataTable from "../../components/dashboard/DataTable";
 import { useToast } from "../../hooks/useToast";
 import { ToastContainer } from "../../components/common/Toast";
 import { formatName } from "../../utils/formatters";
+import { getSpecializationLabel } from "../../utils/specializations";
 import api from "../../services/api";
 import {
   FaCalendarAlt,
   FaCalendarCheck,
+  FaCalendarPlus,
   FaUserMd,
   FaCheckCircle,
   FaUserSlash,
@@ -125,7 +127,7 @@ const Appointments = () => {
           <p className="font-bold text-stone-900 text-base flex items-center gap-1.5">
             <FaUserMd className="text-emerald-600 w-3.5 h-3.5" /> Dr. {row.doctor ? formatName(row.doctor) : "N/A"}
           </p>
-          <p className="text-sm font-semibold text-stone-500 mt-0.5">{row.doctor?.specialization}</p>
+          <p className="text-sm font-semibold text-stone-500 mt-0.5">{getSpecializationLabel(row.doctor?.specialization)}</p>
         </div>
       ),
     },
@@ -532,7 +534,7 @@ const Appointments = () => {
                      <div className="w-8 h-8 rounded-lg bg-stone-50 flex items-center justify-center border border-stone-100 shrink-0">
                         <FaStethoscope className="text-emerald-500 text-sm" />
                      </div>
-                     <span className="font-bold text-stone-700 truncate">{selectedAppointment.doctor.specialization}</span>
+                      <span className="font-bold text-stone-700 truncate">{getSpecializationLabel(selectedAppointment.doctor.specialization)}</span>
                   </div>
                   <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-lg bg-stone-50 flex items-center justify-center border border-stone-100 shrink-0">

@@ -20,6 +20,7 @@ import {
   FaFlask,
   FaFileAlt,
   FaSeedling,
+  FaUserShield,
   FaSignOutAlt
 } from "react-icons/fa";
 import { logout } from "../../redux/slices/authSlice";
@@ -51,6 +52,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         { name: "Inventory", path: "/admin/inventory", icon: FaFlask },
         { name: "Analytics", path: "/admin/analytics", icon: FaChartBar },
         { name: "Reports", path: "/admin/reports", icon: FaFileAlt },
+        { name: "Admins", path: "/admin/admins", icon: FaUserShield },
         { name: "Settings", path: "/admin/settings", icon: FaCog },
       ];
     }

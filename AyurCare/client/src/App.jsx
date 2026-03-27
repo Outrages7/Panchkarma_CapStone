@@ -39,6 +39,7 @@ import TherapyTypes from './pages/admin/TherapyTypes';
 import TherapyRooms from './pages/admin/TherapyRooms';
 import Inventory from './pages/admin/Inventory';
 import Reports from './pages/admin/Reports';
+import AdminAdmins from './pages/admin/Admins';
 
 // Shared Pages
 import Prescriptions from './pages/shared/Prescriptions';
@@ -308,6 +309,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/admins"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminAdmins />
             </ProtectedRoute>
           }
         />

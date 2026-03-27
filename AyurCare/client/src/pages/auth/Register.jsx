@@ -7,6 +7,7 @@ import {
   clearError,
   clearMessage,
 } from "../../redux/slices/authSlice";
+import { SPECIALIZATION_OPTIONS, getSpecializationDescription } from "../../utils/specializations";
 
 const DarkInput = ({ label, name, type = "text", value, onChange, placeholder, error, min, icon: Icon, required }) => (
   <div className="space-y-1.5 w-full">
@@ -146,7 +147,7 @@ const Register = () => {
       if (!formData.experience) errors.experience = "Experience is required";
       if (!formData.consultationFee) errors.consultationFee = "Fee is required";
     } else if (selectedRole === "admin") {
-      if (!formData.department) errors.department = "Department is required";
+      // Admin accounts are managed via admin dashboard, not self-registration
     }
 
     return errors;
@@ -188,7 +189,7 @@ const Register = () => {
       submitData.experience = parseInt(formData.experience);
       submitData.consultationFee = parseFloat(formData.consultationFee);
     } else if (selectedRole === "admin") {
-      submitData.department = formData.department;
+      // No extra fields for admin self-registration
     }
 
     await dispatch(register(submitData));
@@ -317,7 +318,6 @@ const Register = () => {
                 {[
                   { role: "patient", label: "Patient", desc: "Book appointments and track your health", Icon: FaUser, glow: "group-hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]", color: "text-emerald-400" },
                   { role: "doctor", label: "Doctor", desc: "Manage patients, appointments, and medical records", Icon: FaUserMd, glow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]", color: "text-amber-400" },
-                  { role: "admin", label: "Administrator", desc: "Manage hospital operations and platform settings", Icon: FaCog, glow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]", color: "text-purple-400" },
                 ].map(r => (
                   <button
                     key={r.role}
@@ -434,26 +434,22 @@ const Register = () => {
                         className={`w-full px-4 py-3 bg-stone-900 border ${formErrors.specialization ? 'border-red-500/50 focus:border-red-500' : 'border-stone-800 focus:border-emerald-500/50'} rounded-xl text-white appearance-none focus:outline-none focus:ring-0 transition-all font-medium text-sm`}
                       >
                         <option value="">Select your specialization</option>
-                        <option value="Cardiology">Cardiology</option>
-                        <option value="Dermatology">Dermatology</option>
-                        <option value="Endocrinology">Endocrinology</option>
-                        <option value="Gastroenterology">Gastroenterology</option>
-                        <option value="General Medicine">General Medicine</option>
-                        <option value="Gynecology">Gynecology</option>
-                        <option value="Neurology">Neurology</option>
-                        <option value="Oncology">Oncology</option>
-                        <option value="Ophthalmology">Ophthalmology</option>
-                        <option value="Orthopedics">Orthopedics</option>
-                        <option value="Pediatrics">Pediatrics</option>
-                        <option value="Psychiatry">Psychiatry</option>
-                        <option value="Pulmonology">Pulmonology</option>
-                        <option value="Radiology">Radiology</option>
-                        <option value="Urology">Urology</option>
+                        {SPECIALIZATION_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
                       </select>
                       <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
                          <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                       </div>
                     </div>
+                    {formData.specialization && (
+                      <div className="flex items-start gap-2 mt-2 px-3 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                        <FaInfoCircle className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                        <p className="text-xs text-emerald-300/80 font-medium leading-relaxed">
+                          {getSpecializationDescription(formData.specialization)}
+                        </p>
+                      </div>
+                    )}
                     {formErrors.specialization && <p className="text-xs text-red-400 mt-1.5 ml-1 font-medium">{formErrors.specialization}</p>}
                   </div>
                   <DarkInput label="License Number" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} placeholder="MD-123456" error={formErrors.licenseNumber} icon={FaIdCard} />
@@ -464,15 +460,7 @@ const Register = () => {
                 </div>
               )}
 
-              {selectedRole === "admin" && (
-                <div className="space-y-5 border border-stone-800 bg-stone-900/50 p-6 rounded-2xl">
-                  <div className="flex items-center gap-3 mb-2">
-                     <FaBuilding className="text-purple-500 w-5 h-5" />
-                     <h4 className="text-white font-black">Admin Details</h4>
-                  </div>
-                  <DarkInput label="Department" name="department" value={formData.department} onChange={handleChange} placeholder="IT / Logistics / Medical" error={formErrors.department} />
-                </div>
-              )}
+
 
               <div className="flex gap-4 pt-6">
                 <button

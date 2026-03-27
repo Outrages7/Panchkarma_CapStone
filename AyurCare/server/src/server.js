@@ -16,7 +16,9 @@ import healthScoreRoutes from './routes/healthScoreRoutes.js';
 import inventoryRoutes from './routes/inventoryRoutes.js';
 import therapyRoomRoutes from './routes/therapyRoomRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import errorHandler, { notFound } from './middleware/errorHandler.js';
+import { autoCompleteStaleSessions } from './utils/sessionAutoComplete.js';
 
 // Load environment variables
 dotenv.config();
@@ -98,6 +100,30 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'AyurCare API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      admin: '/api/admin',
+      doctor: '/api/doctor',
+      patient: '/api/patient',
+      therapyTypes: '/api/therapy-types',
+      treatmentPlans: '/api/treatment-plans',
+      therapySessions: '/api/therapy-sessions',
+      healthScores: '/api/health-scores',
+      inventory: '/api/inventory',
+      therapyRooms: '/api/therapy-rooms',
+      ai: '/api/ai',
+      notifications: '/api/notifications'
+    }
+  });
+});
+
 // Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({
@@ -121,6 +147,7 @@ app.use('/api/health-scores', healthScoreRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/therapy-rooms', therapyRoomRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler - must be after all routes
 app.use(notFound);
@@ -135,6 +162,12 @@ const PORT = process.env.PORT || 3000;
 if (!process.env.VERCEL) {
   const server = app.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+
+    // Run session auto-complete every 5 minutes
+    setInterval(() => {
+      autoCompleteStaleSessions();
+    }, 5 * 60 * 1000);
+    console.log('⏱️  Session auto-complete scheduler started (every 5 min)');
   });
 
   // Handle unhandled promise rejections

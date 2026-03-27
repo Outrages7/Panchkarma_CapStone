@@ -31,10 +31,9 @@ html {
   transition-duration: 150ms;
 }
 
-/* Focus visible for accessibility */
+/* Focus visible handled per-component via Tailwind focus:ring */
 *:focus-visible {
-  outline: 2px solid #f59e0b;
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Remove default button focus */
@@ -105,8 +104,8 @@ button {
 
 /* Ayurvedic animations */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
 }
 
 @keyframes progress-fill {
@@ -120,4 +119,19 @@ button {
 
 .animate-progress-fill {
   animation: progress-fill 0.8s ease-out forwards;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
 }

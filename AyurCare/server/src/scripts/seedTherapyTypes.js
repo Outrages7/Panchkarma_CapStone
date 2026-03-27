@@ -30,6 +30,7 @@ const therapyTypeSchema = new mongoose.Schema({
   estimatedCost: Number,
   successRate: Number,
   isActive: { type: Boolean, default: true },
+  allowedSpecializations: [String],
 }, { timestamps: true });
 
 const TherapyType = mongoose.model('TherapyType', therapyTypeSchema);
@@ -73,6 +74,7 @@ const therapyTypes = [
     dietaryRequirements: ['Warm rice water (Peya)', 'Thin gruel (Vilepi)', 'Thick gruel (Odana)', 'Gradually progressing to normal diet'],
     estimatedCost: 18000,
     successRate: 88,
+    allowedSpecializations: ['panchakarma', 'kayachikitsa'],
   },
   {
     name: 'virechana',
@@ -112,6 +114,7 @@ const therapyTypes = [
     dietaryRequirements: ['Complete fast after purgation until hunger', 'Warm rice water', 'Thin soup', 'Gradually increase to light normal diet'],
     estimatedCost: 15000,
     successRate: 91,
+    allowedSpecializations: ['panchakarma', 'kayachikitsa'],
   },
   {
     name: 'basti',
@@ -151,6 +154,7 @@ const therapyTypes = [
     dietaryRequirements: ['Warm soups and broths', 'Cooked rice with ghee', 'Khichdi', 'Herbal teas', 'Avoid gas-forming foods'],
     estimatedCost: 25000,
     successRate: 85,
+    allowedSpecializations: ['panchakarma', 'kayachikitsa'],
   },
   {
     name: 'nasya',
@@ -190,6 +194,7 @@ const therapyTypes = [
     dietaryRequirements: ['Warm foods only', 'Ginger and turmeric tea', 'Avoid dairy for 24 hours', 'Light meals', 'Warm water'],
     estimatedCost: 8000,
     successRate: 90,
+    allowedSpecializations: ['panchakarma', 'shalakya_tantra'],
   },
   {
     name: 'raktamokshana',
@@ -229,6 +234,7 @@ const therapyTypes = [
     dietaryRequirements: ['Iron-rich foods (spinach, pomegranate, dates)', 'Pomegranate juice daily', 'Vitamin C rich foods', 'Plenty of fluids', 'Avoid red meat initially'],
     estimatedCost: 12000,
     successRate: 82,
+    allowedSpecializations: ['panchakarma', 'shalya_tantra'],
   },
 ];
 

@@ -3,6 +3,7 @@ import Waitlist from '../models/Waitlist.js';
 import DoctorStatus from '../models/DoctorStatus.js';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import { notifyAppointmentStatusChange } from '../utils/notificationService.js';
 
 /**
  * Get doctor dashboard overview
@@ -182,6 +183,9 @@ export const updateAppointmentStatus = async (req, res, next) => {
       success: true,
       data: appointment,
     });
+
+    // Fire-and-forget notification
+    notifyAppointmentStatusChange({ patientId: appointment.patient, doctorId, appointment, newStatus: status }).catch(() => {});
   } catch (error) {
     next(error);
   }
@@ -477,12 +481,15 @@ export const getAppointmentsByMonth = async (req, res, next) => {
     const doctorId = req.user._id;
     const { year, month } = req.query;
 
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59);
+    const y = parseInt(year, 10);
+    const m = parseInt(month, 10);
+
+    const startDate = new Date(y, m - 1, 1);
+    const endDate = new Date(y, m, 1); // Start of next month
 
     const appointments = await Appointment.find({
       doctor: doctorId,
-      date: { $gte: startDate, $lte: endDate },
+      date: { $gte: startDate, $lt: endDate },
     })
       .populate('patient', 'firstName lastName phone email')
       .sort({ date: 1 });

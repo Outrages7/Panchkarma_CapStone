@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import Modal from "../../components/common/Modal";
 import StatusBadge from "../../components/dashboard/StatusBadge";
-import BookAppointmentModal from "../../components/patient/BookAppointmentModal";
+import BookTherapyModal from "../../components/patient/BookTherapyModal";
 import { useToast } from "../../hooks/useToast";
 import { ToastContainer } from "../../components/common/Toast";
 import { formatName, formatTime } from "../../utils/formatters";
+import { getSpecializationLabel } from "../../utils/specializations";
 import api from "../../services/api";
 import { FaCalendarPlus, FaClock, FaHistory, FaMapMarkerAlt, FaUserMd, FaTimes, FaCalendarAlt } from "react-icons/fa";
 
@@ -55,7 +56,7 @@ const Appointments = () => {
       await api.patch(`/patient/appointments/${selectedAppointment._id}/cancel`);
       toast.success("Appointment cancelled successfully");
       setShowCancelModal(false); setSelectedAppointment(null); fetchUpcomingAppointments();
-    } catch (error) { toast.error(error.response?.data?.error?.message || "Failed to cancel appointment"); } 
+    } catch (error) { toast.error(error.response?.data?.error?.message || error.response?.data?.error || "Failed to cancel appointment"); } 
     finally { setLoading(false); }
   };
 
@@ -66,7 +67,7 @@ const Appointments = () => {
       await api.post(`/patient/appointments/${selectedAppointment._id}/reschedule`, { newDate });
       toast.success("Appointment rescheduled successfully");
       setShowRescheduleModal(false); setSelectedAppointment(null); setNewDate(""); fetchUpcomingAppointments();
-    } catch (error) { toast.error(error.response?.data?.error?.message || "Failed to reschedule appointment"); } 
+    } catch (error) { toast.error(error.response?.data?.error?.message || error.response?.data?.error || "Failed to reschedule appointment"); } 
     finally { setLoading(false); }
   };
 
@@ -140,7 +141,7 @@ const Appointments = () => {
                         </div>
                         <div>
                           <h3 className="font-bold text-stone-900 leading-tight group-hover:text-emerald-700 transition-colors">Dr. {formatName(appointment.doctor)}</h3>
-                          <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest">{appointment.doctor?.specialization}</p>
+                          <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest">{getSpecializationLabel(appointment.doctor?.specialization)}</p>
                         </div>
                       </div>
                       <StatusBadge status={appointment.status} type="appointment" />
@@ -203,7 +204,7 @@ const Appointments = () => {
                       </div>
                       <div>
                         <h3 className="font-bold text-stone-900 leading-tight">Dr. {formatName(appointment.doctor)}</h3>
-                        <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest">{appointment.doctor?.specialization}</p>
+                           <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest">{getSpecializationLabel(appointment.doctor?.specialization)}</p>
                       </div>
                     </div>
                     <StatusBadge status={appointment.status} type="appointment" />
@@ -249,8 +250,62 @@ const Appointments = () => {
         </div>
       </Modal>
 
+      {/* Reschedule Modal */}
+      <Modal isOpen={showRescheduleModal} onClose={() => { setShowRescheduleModal(false); setNewDate(""); setSelectedAppointment(null); }} title="Reschedule Session" size="medium">
+        <div className="space-y-5 pt-2">
+          {/* Current appointment info */}
+          {selectedAppointment && (
+            <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200">
+              <p className="text-xs font-bold uppercase tracking-widest text-stone-400 mb-2">Current Booking</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-stone-950 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                  {selectedAppointment.doctor?.firstName?.charAt(0)}{selectedAppointment.doctor?.lastName?.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-bold text-stone-900 text-sm">Dr. {formatName(selectedAppointment.doctor)}</p>
+                  <p className="text-xs text-stone-500 font-medium">{formatDate(selectedAppointment.date)} · {formatTime(selectedAppointment.date)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* New date picker */}
+          <div>
+            <label className="text-xs font-bold uppercase tracking-widest text-stone-500 block mb-2">
+              New Date & Time *
+            </label>
+            <input
+              type="datetime-local"
+              min={new Date().toISOString().slice(0, 16)}
+              value={newDate}
+              onChange={e => setNewDate(e.target.value)}
+              className="w-full bg-white border-2 border-stone-200 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm font-semibold text-stone-900 focus:outline-none transition-colors"
+            />
+            <p className="text-xs text-stone-400 font-medium mt-2">
+              The doctor's availability will be checked automatically.
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-2 border-t border-stone-100">
+            <button
+              onClick={() => { setShowRescheduleModal(false); setNewDate(""); setSelectedAppointment(null); }}
+              className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 text-stone-900 font-bold rounded-xl transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleRescheduleAppointment}
+              disabled={loading || !newDate}
+              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl transition"
+            >
+              {loading ? "Rescheduling..." : "Confirm Reschedule"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Book & Reschedule Modals */}
-      <BookAppointmentModal isOpen={showBookModal} onClose={() => setShowBookModal(false)} onSuccess={fetchUpcomingAppointments} toast={toast} />
+      <BookTherapyModal isOpen={showBookModal} onClose={() => setShowBookModal(false)} onSuccess={fetchUpcomingAppointments} />
     </DashboardLayout>
   );
 };

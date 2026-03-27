@@ -354,13 +354,13 @@ const Inventory = () => {
                      </div>
                   </div>
 
-                  <div className="bg-amber-50/60 p-5 rounded-2xl border border-amber-100/50 space-y-4">
-                     <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-2 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Datastore Metrics
+                  <div className="bg-emerald-50/60 p-5 rounded-2xl border border-emerald-100/50 space-y-4">
+                     <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Datastore Metrics
                      </p>
                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                        <div>
-                         <label className="text-[10px] font-bold text-amber-900 uppercase tracking-widest block mb-1.5">Current Cap <span className="text-red-500">*</span></label>
+                         <label className="text-[10px] font-bold text-emerald-900 uppercase tracking-widest block mb-1.5">Current Cap <span className="text-red-500">*</span></label>
                          <input 
                            type="number" 
                            min="0" 
@@ -368,29 +368,29 @@ const Inventory = () => {
                            onChange={e => setForm(f => ({ ...f, stockQuantity: e.target.value }))} 
                            required 
                            placeholder="0"
-                           className="w-full bg-white border border-amber-200 rounded-xl px-4 py-3 text-lg font-black outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-amber-900 shadow-inner" 
+                           className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-3 text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-emerald-900 shadow-inner" 
                          />
                        </div>
                        <div>
-                         <label className="text-[10px] font-bold text-amber-900 uppercase tracking-widest block mb-1.5">Trigger Defect</label>
+                         <label className="text-[10px] font-bold text-emerald-900 uppercase tracking-widest block mb-1.5">Trigger Defect</label>
                          <input 
                            type="number" 
                            min="0" 
                            value={form.reorderLevel} 
                            onChange={e => setForm(f => ({ ...f, reorderLevel: e.target.value }))} 
                            placeholder="5"
-                           className="w-full bg-white border border-amber-200 rounded-xl px-4 py-3 text-lg font-black outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-amber-900 shadow-inner" 
+                           className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-3 text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-emerald-900 shadow-inner" 
                          />
                        </div>
                        <div>
-                         <label className="text-[10px] font-bold text-amber-900 uppercase tracking-widest block mb-1.5">Unit Value (₹)</label>
+                         <label className="text-[10px] font-bold text-emerald-900 uppercase tracking-widest block mb-1.5">Unit Value (₹)</label>
                          <input 
                            type="number" 
                            min="0" 
                            value={form.price} 
                            onChange={e => setForm(f => ({ ...f, price: e.target.value }))} 
                            placeholder="499"
-                           className="w-full bg-white border border-amber-200 rounded-xl px-4 py-3 text-lg font-black outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-amber-900 shadow-inner" 
+                           className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-3 text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-emerald-900 shadow-inner" 
                          />
                        </div>
                      </div>

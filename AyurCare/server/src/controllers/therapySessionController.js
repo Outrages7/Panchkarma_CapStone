@@ -1,5 +1,6 @@
 import TherapySession from '../models/TherapySession.js';
 import TreatmentPlan from '../models/TreatmentPlan.js';
+import { notifySessionScheduled, notifySessionCompleted } from '../utils/notificationService.js';
 
 export const getPatientSessions = async (req, res) => {
   try {
@@ -47,6 +48,9 @@ export const createSession = async (req, res) => {
       $inc: { totalSessions: 1 },
     });
     res.status(201).json({ success: true, data: session });
+
+    // Fire-and-forget notification
+    notifySessionScheduled({ patientId: session.patient, session }).catch(() => {});
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
@@ -91,6 +95,9 @@ export const endSession = async (req, res) => {
     }
 
     res.json({ success: true, data: session });
+
+    // Fire-and-forget notification
+    notifySessionCompleted({ patientId: session.patient, session }).catch(() => {});
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
@@ -197,6 +204,60 @@ export const getAllSessions = async (req, res) => {
       .skip((page - 1) * limit);
     const total = await TherapySession.countDocuments(query);
     res.json({ success: true, data: sessions, total });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * Get completed sessions awaiting patient feedback (no rating yet, completed within last 2 hours).
+ * Patient has a 2-hour window to leave feedback after doctor completes the session.
+ */
+export const getPendingFeedback = async (req, res) => {
+  try {
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+    const sessions = await TherapySession.find({
+      patient: req.user._id,
+      status: 'completed',
+      'patientFeedback.rating': { $exists: false },
+      updatedAt: { $gte: twoHoursAgo },
+    })
+      .populate('therapyType', 'name displayName')
+      .populate('practitioner', 'firstName lastName')
+      .sort({ updatedAt: -1 })
+      .limit(3);
+
+    res.json({ success: true, data: sessions });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * Get sessions that are still in-progress past their scheduled end time.
+ * Used by doctor dashboard to prompt session completion.
+ */
+export const getOverdueSessions = async (req, res) => {
+  try {
+    const now = new Date();
+
+    const sessions = await TherapySession.find({
+      practitioner: req.user._id,
+      status: 'in-progress',
+      actualStartTime: { $exists: true },
+    })
+      .populate('patient', 'firstName lastName')
+      .populate('therapyType', 'name displayName');
+
+    // Filter to only sessions that are past their expected end
+    const overdue = sessions.filter(s => {
+      const duration = s.durationMinutes || 60;
+      const expectedEnd = new Date(s.actualStartTime.getTime() + duration * 60000);
+      return now > expectedEnd;
+    });
+
+    res.json({ success: true, data: overdue });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

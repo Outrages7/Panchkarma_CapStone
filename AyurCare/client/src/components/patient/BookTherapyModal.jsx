@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import api from '../../services/api';
+import { getSpecializationLabel } from '../../utils/specializations';
 import {
   FaWater,
   FaLeaf,
@@ -21,9 +22,9 @@ const THERAPY_ICONS = {
 };
 
 const DOSHA_COLORS = {
-  kapha: 'bg-blue-100 text-blue-700',
-  pitta: 'bg-red-100 text-red-700',
-  vata: 'bg-purple-100 text-purple-700',
+  kapha: 'bg-blue-50 text-blue-600 border border-blue-200',
+  pitta: 'bg-red-50 text-red-600 border border-red-200',
+  vata: 'bg-purple-50 text-purple-600 border border-purple-200',
 };
 
 const BookTherapyModal = ({ isOpen, onClose, onSuccess }) => {
@@ -36,6 +37,17 @@ const BookTherapyModal = ({ isOpen, onClose, onSuccess }) => {
   const [chiefComplaints, setChiefComplaints] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Filter practitioners based on selected therapy's allowedSpecializations
+  const filteredPractitioners = selectedTherapy?.allowedSpecializations?.length > 0
+    ? practitioners.filter(p => selectedTherapy.allowedSpecializations.includes(p.specialization))
+    : practitioners;
+
+  // Only show therapy types that have at least one qualified practitioner available
+  const availableTherapyTypes = therapyTypes.filter(t => {
+    if (!t.allowedSpecializations || t.allowedSpecializations.length === 0) return true;
+    return practitioners.some(p => t.allowedSpecializations.includes(p.specialization));
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -73,7 +85,7 @@ const BookTherapyModal = ({ isOpen, onClose, onSuccess }) => {
       await api.post('/patient/appointments', {
         doctor: selectedPractitioner._id,
         date: new Date(preferredDate).toISOString(),
-        department: selectedTherapy.name,
+        department: selectedPractitioner.specialization,
         reason: chiefComplaints || `${selectedTherapy.displayName} therapy`,
         type: 'new',
         therapyType: selectedTherapy._id,
@@ -101,24 +113,28 @@ const BookTherapyModal = ({ isOpen, onClose, onSuccess }) => {
 
   const renderTherapyIcon = (name) => {
     const IconComponent = THERAPY_ICONS[name] || FaLeaf;
-    return <IconComponent className="w-6 h-6 text-stone-600" />;
+    return (
+      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 group-hover:bg-emerald-100 group-hover:border-emerald-300 transition-colors shrink-0">
+        <IconComponent className="w-5 h-5 text-emerald-600" />
+      </div>
+    );
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Book Therapy Session" size="lg">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Book Therapy Session" size="xlarge">
       {/* Step indicator */}
-      <div className="flex items-center justify-center mb-6">
+      <div className="flex items-center justify-center mb-8 mt-2">
         {[1, 2, 3].map(s => (
           <div key={s} className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-              s < step ? 'bg-emerald-500 text-white' :
-              s === step ? 'bg-stone-500 text-white' :
-              'bg-stone-200 text-stone-400'
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 ${
+              s < step ? 'bg-emerald-100 text-emerald-600 border-2 border-emerald-400' :
+              s === step ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' :
+              'bg-stone-100 border-2 border-stone-200 text-stone-400'
             }`}>
               {s < step ? <FaCheckCircle className="w-4 h-4" /> : s}
             </div>
             {s < 3 && (
-              <div className={`w-12 h-1 mx-1 ${s < step ? 'bg-emerald-400' : 'bg-stone-200'}`} />
+              <div className={`w-12 h-0.5 mx-2 rounded-full transition-all duration-300 ${s < step ? 'bg-emerald-400' : 'bg-stone-200'}`} />
             )}
           </div>
         ))}
@@ -127,34 +143,43 @@ const BookTherapyModal = ({ isOpen, onClose, onSuccess }) => {
       {/* Step 1: Choose Therapy */}
       {step === 1 && (
         <div>
-          <h3 className="text-sm font-semibold text-stone-600 mb-3">Choose Your Panchakarma Therapy</h3>
-          <div className="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto pr-1">
-            {therapyTypes.map(t => (
+          <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Choose Your Panchakarma Therapy</h3>
+          <div className="grid grid-cols-1 gap-3 max-h-[22rem] overflow-y-auto pr-2 custom-scrollbar">
+            {availableTherapyTypes.length === 0 && (
+              <div className="text-center py-10">
+                <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FaLeaf className="w-5 h-5 text-stone-300" />
+                </div>
+                <p className="text-sm font-semibold text-stone-400">No therapies available</p>
+                <p className="text-xs text-stone-400 mt-1">Please contact your clinic to set up therapy types.</p>
+              </div>
+            )}
+            {availableTherapyTypes.map(t => (
               <button
                 key={t._id}
                 onClick={() => setSelectedTherapy(t)}
-                className={`text-left p-4 rounded-xl border-2 transition-all ${
+                className={`text-left p-4 rounded-2xl border-2 transition-all duration-300 group ${
                   selectedTherapy?._id === t._id
-                    ? 'border-stone-400 bg-stone-50'
-                    : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50/50'
+                    ? 'border-emerald-500 bg-emerald-50/50 shadow-md shadow-emerald-100'
+                    : 'border-stone-200 bg-white hover:border-stone-300 hover:shadow-sm'
                 }`}
               >
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start space-x-4">
                   {renderTherapyIcon(t.name)}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between flex-wrap gap-1">
-                      <span className="font-semibold text-stone-800 text-sm">{t.displayName}</span>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                       <span className={`font-bold text-sm transition-colors ${selectedTherapy?._id === t._id ? 'text-emerald-800' : 'text-stone-800 group-hover:text-stone-900'}`}>{t.displayName}</span>
                       {t.primaryDosha && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${DOSHA_COLORS[t.primaryDosha] || 'bg-stone-100 text-stone-600'}`}>
-                          {t.primaryDosha} dosha
+                        <span className={`text-[9px] px-2.5 py-1 rounded-full font-black uppercase tracking-widest ${DOSHA_COLORS[t.primaryDosha] || 'bg-stone-100 text-stone-500 border border-stone-200'}`}>
+                          {t.primaryDosha} FOCUS
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-stone-500 mt-1 line-clamp-2">{t.description}</p>
-                    <div className="flex gap-3 mt-2 text-xs text-stone-400">
-                      <span className="flex items-center gap-1"><FaClock className="w-3 h-3" /> {t.totalDurationDays} days</span>
-                      {t.estimatedCost && <span>₹{t.estimatedCost.toLocaleString()}</span>}
-                      {t.successRate && <span className="flex items-center gap-1"><FaCheckCircle className="w-3 h-3" /> {t.successRate}% success</span>}
+                    <p className="text-xs text-stone-500 mt-2 line-clamp-2 leading-relaxed font-medium">{t.description}</p>
+                    <div className="flex gap-4 mt-3 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                      <span className="flex items-center gap-1.5"><FaClock className="w-3 h-3 text-stone-400" /> {t.totalDurationDays} Days</span>
+                      {t.estimatedCost && <span className="text-emerald-600">₹{t.estimatedCost.toLocaleString()}</span>}
+                      {t.successRate && <span className="flex items-center gap-1.5"><FaCheckCircle className="w-3 h-3 text-emerald-500" /> {t.successRate}% Success</span>}
                     </div>
                   </div>
                 </div>
@@ -172,55 +197,60 @@ const BookTherapyModal = ({ isOpen, onClose, onSuccess }) => {
       {/* Step 2: Select Practitioner & Date */}
       {step === 2 && (
         <div>
-          <h3 className="text-sm font-semibold text-stone-600 mb-3">
+          <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">
             Select Practitioner & Schedule
           </h3>
           <div className="space-y-3 max-h-48 overflow-y-auto pr-1 mb-4">
-            {practitioners.map(p => (
+            {filteredPractitioners.length > 0 ? filteredPractitioners.map(p => (
               <button
                 key={p._id}
                 onClick={() => setSelectedPractitioner(p)}
                 className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
                   selectedPractitioner?._id === p._id
-                    ? 'border-stone-400 bg-stone-50'
+                    ? 'border-emerald-500 bg-emerald-50/50 shadow-md shadow-emerald-100'
                     : 'border-stone-200 hover:border-stone-300'
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-stone-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-sm border border-emerald-200">
                     {p.firstName?.[0]}{p.lastName?.[0]}
                   </div>
                   <div>
                     <p className="font-semibold text-stone-800 text-sm">Dr. {p.firstName} {p.lastName}</p>
-                    <p className="text-xs text-stone-500">{p.specialization}</p>
+                    <p className="text-xs text-stone-500">{getSpecializationLabel(p.specialization)}</p>
                   </div>
                   {p.consultationFee && (
-                    <span className="ml-auto text-xs text-emerald-600 font-semibold">₹{p.consultationFee}</span>
+                    <span className="ml-auto text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">₹{p.consultationFee}</span>
                   )}
                 </div>
               </button>
-            ))}
+            )) : (
+              <div className="text-center py-8 bg-stone-50 rounded-xl border border-stone-200">
+                <p className="text-sm font-semibold text-stone-600">No qualified practitioners available</p>
+                <p className="text-xs text-stone-400 mt-1">No doctors with the required specialization are currently registered.</p>
+              </div>
+            )}
           </div>
 
           <div className="mb-4">
-            <label className="text-xs font-semibold text-stone-600 block mb-1">Preferred Date *</label>
+            <label className="text-xs font-bold text-stone-600 block mb-1.5">Preferred Date & Time *</label>
             <input
               type="datetime-local"
               min={today}
               value={preferredDate}
               onChange={e => setPreferredDate(e.target.value)}
-              className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
 
           <div className="mb-4">
-            <label className="text-xs font-semibold text-stone-600 block mb-1">Chief Complaints / Goals</label>
+            <label className="text-xs font-bold text-stone-600 block mb-1.5">Chief Complaints / Goals</label>
             <textarea
               rows={2}
               value={chiefComplaints}
               onChange={e => setChiefComplaints(e.target.value)}
               placeholder="Describe your main health concerns..."
-              className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+              className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none"
             />
           </div>
 
@@ -236,34 +266,40 @@ const BookTherapyModal = ({ isOpen, onClose, onSuccess }) => {
       {/* Step 3: Confirm */}
       {step === 3 && (
         <div>
-          <h3 className="text-sm font-semibold text-stone-600 mb-4">Confirm Your Booking</h3>
-          <div className="bg-stone-50 rounded-xl p-4 border border-stone-200 space-y-3 mb-4">
+          <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Confirm Your Booking</h3>
+          <div className="bg-stone-50 rounded-2xl p-5 border border-stone-200 space-y-3.5 mb-4">
             <div className="flex justify-between text-sm">
-              <span className="text-stone-500">Therapy</span>
-              <span className="font-semibold text-stone-800 flex items-center gap-1">
-                {(() => { const Icon = THERAPY_ICONS[selectedTherapy?.name] || FaLeaf; return <Icon className="w-4 h-4 text-stone-600" />; })()}
+              <span className="text-stone-500 font-medium">Therapy</span>
+              <span className="font-bold text-stone-800 flex items-center gap-1.5">
+                {(() => { const Icon = THERAPY_ICONS[selectedTherapy?.name] || FaLeaf; return <Icon className="w-4 h-4 text-emerald-600" />; })()}
                 {selectedTherapy?.displayName}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-stone-500">Practitioner</span>
-              <span className="font-semibold text-stone-800">
+              <span className="text-stone-500 font-medium">Practitioner</span>
+              <span className="font-bold text-stone-800">
                 Dr. {selectedPractitioner?.firstName} {selectedPractitioner?.lastName}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-stone-500">Date & Time</span>
-              <span className="font-semibold text-stone-800">
+              <span className="text-stone-500 font-medium">Date & Time</span>
+              <span className="font-bold text-stone-800">
                 {preferredDate ? new Date(preferredDate).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-stone-500">Duration</span>
-              <span className="font-semibold text-stone-800">{selectedTherapy?.totalDurationDays} days program</span>
+              <span className="text-stone-500 font-medium">Duration</span>
+              <span className="font-bold text-stone-800">{selectedTherapy?.totalDurationDays} days program</span>
             </div>
+            {selectedTherapy?.estimatedCost && (
+              <div className="flex justify-between text-sm pt-2 border-t border-stone-200">
+                <span className="text-stone-500 font-medium">Estimated Cost</span>
+                <span className="font-extrabold text-emerald-700">₹{selectedTherapy.estimatedCost.toLocaleString()}</span>
+              </div>
+            )}
           </div>
 
-          {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+          {error && <p className="text-sm font-semibold text-red-500 mb-3">{error}</p>}
 
           <div className="flex justify-between">
             <Button variant="ghost" onClick={() => setStep(2)}>Back</Button>

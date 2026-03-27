@@ -38,4 +38,9 @@ router.get("/analytics/appointments", adminController.getAppointmentsAnalytics);
 router.get("/analytics/waiting-time", adminController.getWaitingTimeAnalytics);
 router.get("/analytics/utilization", adminController.getUtilizationAnalytics);
 
+// Admin management
+router.get("/admins", adminController.getAdmins);
+router.post("/admins", adminController.createAdmin);
+router.delete("/admins/:id", adminController.deleteAdmin);
+
 export default router;

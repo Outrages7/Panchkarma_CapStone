@@ -7,11 +7,14 @@ import Modal from "../../components/common/Modal";
 import { useToast } from "../../hooks/useToast";
 import { ToastContainer } from "../../components/common/Toast";
 import api from "../../services/api";
+import { FaInfoCircle } from "react-icons/fa";
+import { SPECIALIZATION_OPTIONS, getSpecializationLabel, getSpecializationDescription } from "../../utils/specializations";
 
 const Profile = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user: reduxUser } = useSelector((state) => state.auth);
   const { toasts, toast, removeToast } = useToast();
 
+  const [user, setUser] = useState(reduxUser);
   const [loading, setLoading] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingProfessional, setIsEditingProfessional] = useState(false);
@@ -41,6 +44,24 @@ const Profile = () => {
     confirmPassword: "",
   });
 
+  // Fetch fresh profile data from API
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get("/auth/me");
+      const freshUser = res.data.data || res.data.user || res.data;
+      setUser(freshUser);
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+      setUser(reduxUser);
+    }
+  };
+
+  // Fetch on mount
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  // Populate form state when user data changes
   useEffect(() => {
     if (user) {
       setPersonalData({
@@ -68,6 +89,7 @@ const Profile = () => {
       await api.patch("/doctor/profile/personal", personalData);
       toast.success("Personal information updated successfully!");
       setIsEditingPersonal(false);
+      fetchProfile();
     } catch (error) {
       toast.error(
         error.response?.data?.error?.message || "Failed to update profile"
@@ -83,6 +105,7 @@ const Profile = () => {
       await api.patch("/doctor/profile/professional", professionalData);
       toast.success("Professional information updated successfully!");
       setIsEditingProfessional(false);
+      fetchProfile();
     } catch (error) {
       toast.error(
         error.response?.data?.error?.message || "Failed to update profile"
@@ -160,18 +183,52 @@ const Profile = () => {
         {/* Profile Header */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-7">
           <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 bg-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {user?.firstName?.charAt(0)}
-              {user?.lastName?.charAt(0)}
+            <div className="relative">
+              <div className="w-20 h-20 bg-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                {user?.firstName?.charAt(0)}
+                {user?.lastName?.charAt(0)}
+              </div>
+              {/* Verification dot on avatar */}
+              <div className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${user?.isApproved ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                {user?.isApproved ? (
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                ) : (
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 8v4m0 4h.01" /></svg>
+                )}
+              </div>
             </div>
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-stone-900">
-                Dr. {user?.firstName} {user?.lastName}
-              </h2>
-              <p className="text-stone-600">{user?.specialization}</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-3xl font-bold tracking-tight text-stone-900">
+                  Dr. {user?.firstName} {user?.lastName}
+                </h2>
+                {user?.isApproved ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Verified
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Pending Verification
+                  </span>
+                )}
+              </div>
+              <p className="text-stone-600">{getSpecializationLabel(user?.specialization)}</p>
               <p className="text-sm text-stone-500">{user?.email}</p>
             </div>
           </div>
+
+          {/* Pending verification banner */}
+          {!user?.isApproved && (
+            <div className="mt-5 flex items-start gap-3 px-4 py-3.5 bg-amber-50 border border-amber-200 rounded-xl">
+              <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <div>
+                <p className="text-sm font-bold text-amber-800">Your account is pending admin verification</p>
+                <p className="text-xs text-amber-600 font-medium mt-0.5">You'll receive a notification once your credentials have been reviewed and approved.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Personal Information */}
@@ -295,16 +352,32 @@ const Profile = () => {
           <div className="p-6">
             {isEditingProfessional ? (
               <div className="space-y-4">
-                <Input
-                  label="Specialization"
-                  value={professionalData.specialization}
-                  onChange={(e) =>
-                    setProfessionalData({
-                      ...professionalData,
-                      specialization: e.target.value,
-                    })
-                  }
-                />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Specialization</label>
+                  <select
+                    value={professionalData.specialization}
+                    onChange={(e) =>
+                      setProfessionalData({
+                        ...professionalData,
+                        specialization: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-xl text-stone-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                  >
+                    <option value="">Select specialization</option>
+                    {SPECIALIZATION_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  {professionalData.specialization && (
+                    <div className="flex items-start gap-2 mt-1.5 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <FaInfoCircle className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                      <p className="text-xs text-emerald-700 font-medium leading-relaxed">
+                        {getSpecializationDescription(professionalData.specialization)}
+                      </p>
+                    </div>
+                  )}
+                </div>
 
                 <Input
                   label="License Number"
@@ -360,8 +433,14 @@ const Profile = () => {
                 <div>
                   <p className="text-sm text-stone-600">Specialization</p>
                   <p className="font-medium text-stone-900">
-                    {user?.specialization}
+                    {getSpecializationLabel(user?.specialization)}
                   </p>
+                  {user?.specialization && (
+                    <p className="text-xs text-stone-500 mt-0.5 flex items-center gap-1">
+                      <FaInfoCircle className="w-3 h-3 text-stone-400" />
+                      {getSpecializationDescription(user?.specialization)}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <p className="text-sm text-stone-600">License Number</p>

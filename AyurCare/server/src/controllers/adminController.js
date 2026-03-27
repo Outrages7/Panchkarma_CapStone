@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import Waitlist from "../models/Waitlist.js";
 import AILog from "../models/AILog.js";
 import DoctorStatus from "../models/DoctorStatus.js";
+import bcrypt from "bcryptjs";
+import { getSpecializationLabel } from "../utils/specializations.js";
 
 /**
  * Get all departments with stats
@@ -25,6 +27,7 @@ export const getDepartments = async (req, res, next) => {
       if (!departmentMap[dept]) {
         departmentMap[dept] = {
           name: dept,
+          displayName: getSpecializationLabel(dept),
           totalDoctors: 0,
           doctors: [],
         };
@@ -731,6 +734,117 @@ export const cancelAppointment = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: appointment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get all admin users
+ */
+export const getAdmins = async (req, res, next) => {
+  try {
+    const admins = await User.find({ role: "admin" })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: admins,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Create a new admin user
+ */
+export const createAdmin = async (req, res, next) => {
+  try {
+    const { firstName, lastName, email, password, phone, department } = req.body;
+
+    if (!firstName || !lastName || !email || !password || !phone) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide all required fields",
+      });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: "An account with this email already exists",
+      });
+    }
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const admin = await User.create({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      phone,
+      role: "admin",
+      department: department || "Administration",
+      isEmailVerified: true,
+    });
+
+    // Return without password
+    const adminData = admin.toObject();
+    delete adminData.password;
+
+    res.status(201).json({
+      success: true,
+      data: adminData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Delete an admin user
+ */
+export const deleteAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Prevent self-deletion
+    if (id === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        error: "You cannot delete your own admin account",
+      });
+    }
+
+    const admin = await User.findById(id);
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        error: "Admin not found",
+      });
+    }
+
+    if (admin.role !== "admin") {
+      return res.status(400).json({
+        success: false,
+        error: "This user is not an admin",
+      });
+    }
+
+    await User.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Admin deleted successfully",
     });
   } catch (error) {
     next(error);

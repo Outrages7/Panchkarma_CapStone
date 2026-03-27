@@ -8,6 +8,7 @@ import DataTable from "../../components/dashboard/DataTable";
 import { useToast } from "../../hooks/useToast";
 import { ToastContainer } from "../../components/common/Toast";
 import { formatName } from "../../utils/formatters";
+import { getSpecializationLabel } from "../../utils/specializations";
 import api from "../../services/api";
 import {
   FaUserMd,
@@ -87,7 +88,7 @@ const Doctors = () => {
                 />
               )}
             </p>
-            <p className="text-sm font-semibold text-stone-500 mt-0.5">{row.specialization}</p>
+            <p className="text-sm font-semibold text-stone-500 mt-0.5">{getSpecializationLabel(row.specialization)}</p>
           </div>
         </div>
       ),
@@ -364,7 +365,7 @@ const Doctors = () => {
                     )}
                   </h2>
                   <p className="text-stone-300 text-lg font-medium mb-3">
-                    {selectedDoctor.specialization} Specialization
+                    {getSpecializationLabel(selectedDoctor.specialization)} Specialization
                   </p>
                   
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">

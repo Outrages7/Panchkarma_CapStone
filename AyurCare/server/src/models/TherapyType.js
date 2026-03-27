@@ -34,6 +34,10 @@ const therapyTypeSchema = new mongoose.Schema({
   },
   estimatedCost: Number,
   successRate: { type: Number, min: 0, max: 100 },
+  allowedSpecializations: [{
+    type: String,
+    enum: ['kayachikitsa', 'panchakarma', 'shalya_tantra', 'shalakya_tantra', 'kaumarabhritya', 'agada_tantra', 'rasayana', 'vajikarana', 'dravyaguna', 'manas_roga'],
+  }],
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 

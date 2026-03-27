@@ -2,6 +2,8 @@ import Appointment from "../models/Appointment.js";
 import Waitlist from "../models/Waitlist.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import { notifyAppointmentBooked, notifyAppointmentCancelled, notifyAppointmentRescheduled } from "../utils/notificationService.js";
+import { getSpecializationLabel } from "../utils/specializations.js";
 
 /**
  * Get list of departments (based on active, approved doctors)
@@ -39,9 +41,15 @@ export const getDepartments = async (req, res, next) => {
       },
     ]);
 
+    // Add displayName to each department
+    const departmentsWithLabels = departments.map(dept => ({
+      ...dept,
+      displayName: getSpecializationLabel(dept.name),
+    }));
+
     res.status(200).json({
       success: true,
-      data: departments,
+      data: departmentsWithLabels,
     });
   } catch (error) {
     next(error);
@@ -264,6 +272,9 @@ export const bookAppointment = async (req, res, next) => {
       data: appointment,
       message: "Appointment booked successfully",
     });
+
+    // Fire-and-forget notification
+    notifyAppointmentBooked({ patientId, doctorId, appointment }).catch(() => {});
   } catch (error) {
     next(error);
   }
@@ -393,6 +404,9 @@ export const cancelAppointment = async (req, res, next) => {
       success: true,
       message: "Appointment cancelled successfully",
     });
+
+    // Fire-and-forget notification
+    notifyAppointmentCancelled({ patientId, doctorId: appointment.doctor, appointment, cancelledByRole: 'patient' }).catch(() => {});
   } catch (error) {
     next(error);
   }
@@ -484,6 +498,9 @@ export const rescheduleAppointment = async (req, res, next) => {
       success: true,
       data: appointment,
     });
+
+    // Fire-and-forget notification
+    notifyAppointmentRescheduled({ patientId, doctorId: appointment.doctor, appointment }).catch(() => {});
   } catch (error) {
     next(error);
   }

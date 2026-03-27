@@ -2,30 +2,33 @@ import { useState, useEffect } from "react";
 import {
   FaHeartbeat,
   FaBrain,
-  FaBone,
   FaBaby,
-  FaAllergies,
-  FaStethoscope,
   FaEye,
-  FaLungs,
-  FaTooth,
   FaUserMd,
-  FaFemale,
-  FaRadiation,
-  FaXRay,
   FaArrowLeft,
   FaCheck,
   FaCalendarAlt,
   FaClock,
   FaMoneyBillWave,
   FaHeart,
-  FaPills,
+  FaLeaf,
+  FaSeedling,
+  FaShieldAlt,
+  FaCut,
 } from "react-icons/fa";
+import { FaSpa } from "react-icons/fa6";
 import Button from "../common/Button";
 import Input from "../common/Input";
 import StatusBadge from "../dashboard/StatusBadge";
 import { formatName } from "../../utils/formatters";
+import { getSpecializationLabel, getSpecializationInfo } from "../../utils/specializations";
 import api from "../../services/api";
+
+// Map icon name strings to actual React icon components
+const ICON_MAP = {
+  FaHeartbeat, FaBrain, FaBaby, FaEye, FaUserMd,
+  FaLeaf, FaHeart, FaSeedling, FaShieldAlt, FaCut, FaSpa,
+};
 
 const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
   const [step, setStep] = useState(1);
@@ -72,102 +75,14 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
   }, [isOpen]);
 
   const getDepartmentInfo = (dept) => {
-    const deptLower = dept.toLowerCase();
-    const departmentMap = {
-      cardiology: {
-        icon: <FaHeartbeat className="w-7 h-7 text-white" />,
-        bgColor: "bg-red-500",
-        description: "Heart and cardiovascular care",
-      },
-      neurology: {
-        icon: <FaBrain className="w-7 h-7 text-white" />,
-        bgColor: "bg-purple-600",
-        description: "Brain and nervous system",
-      },
-      orthopedics: {
-        icon: <FaBone className="w-7 h-7 text-white" />,
-        bgColor: "bg-amber-600",
-        description: "Bones, joints, and muscles",
-      },
-      pediatrics: {
-        icon: <FaBaby className="w-7 h-7 text-white" />,
-        bgColor: "bg-pink-500",
-        description: "Child healthcare specialists",
-      },
-      dermatology: {
-        icon: <FaAllergies className="w-7 h-7 text-white" />,
-        bgColor: "bg-teal-500",
-        description: "Skin, hair, and nail care",
-      },
-      "general medicine": {
-        icon: <FaStethoscope className="w-7 h-7 text-white" />,
-        bgColor: "bg-amber-600",
-        description: "Primary healthcare services",
-      },
-      ophthalmology: {
-        icon: <FaEye className="w-7 h-7 text-white" />,
-        bgColor: "bg-sky-500",
-        description: "Eye care and vision",
-      },
-      pulmonology: {
-        icon: <FaLungs className="w-7 h-7 text-white" />,
-        bgColor: "bg-cyan-500",
-        description: "Lung and respiratory care",
-      },
-      dentistry: {
-        icon: <FaTooth className="w-7 h-7 text-white" />,
-        bgColor: "bg-emerald-500",
-        description: "Dental and oral health",
-      },
-      nephrology: {
-        icon: <FaHeart className="w-7 h-7 text-white" />,
-        bgColor: "bg-rose-500",
-        description: "Kidney care specialists",
-      },
-      gastroenterology: {
-        icon: <FaPills className="w-7 h-7 text-white" />,
-        bgColor: "bg-yellow-500",
-        description: "Digestive system care",
-      },
-      endocrinology: {
-        icon: <FaStethoscope className="w-7 h-7 text-white" />,
-        bgColor: "bg-violet-500",
-        description: "Hormones and metabolism",
-      },
-      gynecology: {
-        icon: <FaFemale className="w-7 h-7 text-white" />,
-        bgColor: "bg-pink-500",
-        description: "Women's health specialists",
-      },
-      oncology: {
-        icon: <FaRadiation className="w-7 h-7 text-white" />,
-        bgColor: "bg-orange-500",
-        description: "Cancer treatment and care",
-      },
-      psychiatry: {
-        icon: <FaBrain className="w-7 h-7 text-white" />,
-        bgColor: "bg-indigo-500",
-        description: "Mental health specialists",
-      },
-      radiology: {
-        icon: <FaXRay className="w-7 h-7 text-white" />,
-        bgColor: "bg-gray-500",
-        description: "Medical imaging and diagnostics",
-      },
-      urology: {
-        icon: <FaUserMd className="w-7 h-7 text-white" />,
-        bgColor: "bg-amber-700",
-        description: "Urinary tract specialists",
-      },
+    const info = getSpecializationInfo(dept);
+    const IconComponent = ICON_MAP[info.iconName] || FaUserMd;
+    return {
+      icon: <IconComponent className="w-7 h-7 text-white" />,
+      bgColor: info.bgColor,
+      description: info.description,
+      displayName: info.displayName,
     };
-
-    return (
-      departmentMap[deptLower] || {
-        icon: <FaUserMd className="w-7 h-7 text-white" />,
-        bgColor: "bg-gray-500",
-        description: "Specialized medical care",
-      }
-    );
   };
 
   const fetchDoctorsByDepartment = async (department) => {
@@ -284,13 +199,13 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="bg-amber-600 px-6 py-4">
+        <div className="bg-stone-950/50 border-b border-stone-800 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Book Appointment</h2>
-              <p className="text-blue-100 text-sm mt-1">
+              <h2 className="text-xl font-extrabold text-white tracking-tight">Book Appointment</h2>
+              <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-1">
                 {step === 1 && "Select a department to get started"}
                 {step === 2 && "Choose your preferred doctor"}
                 {step === 3 && "Pick a convenient date and time"}
@@ -299,7 +214,7 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors"
+              className="text-stone-500 hover:text-stone-300 transition-colors"
             >
               <svg
                 className="w-6 h-6"
@@ -328,23 +243,23 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
               <div key={item.num} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold border-2 ${
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black transition-all duration-300 border ${
                       step > item.num
-                        ? "bg-white text-blue-600 border-white"
+                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                         : step === item.num
-                        ? "bg-white text-blue-600 border-white"
-                        : "bg-transparent text-blue-200 border-blue-300"
+                        ? "bg-stone-800 text-white border-stone-600 shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+                        : "bg-stone-900 border-stone-800 text-stone-600"
                     }`}
                   >
                     {step > item.num ? (
-                      <FaCheck className="w-5 h-5" />
+                      <FaCheck className="w-4 h-4" />
                     ) : (
                       item.num
                     )}
                   </div>
                   <span
-                    className={`text-xs mt-2 ${
-                      step >= item.num ? "text-white" : "text-blue-200"
+                    className={`text-[10px] uppercase font-black tracking-widest mt-2 transition-colors ${
+                      step >= item.num ? "text-stone-300" : "text-stone-600"
                     }`}
                   >
                     {item.label}
@@ -352,8 +267,8 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                 </div>
                 {index < 3 && (
                   <div
-                    className={`h-1 flex-1 mx-2 rounded ${
-                      step > item.num ? "bg-white" : "bg-blue-400"
+                    className={`h-1 flex-1 mx-2 rounded-full transition-all duration-300 ${
+                      step > item.num ? "bg-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.4)]" : "bg-stone-800"
                     }`}
                   />
                 )}
@@ -366,14 +281,14 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {/* Step 1: Select Department */}
           {step === 1 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-6">
                 Select Department
               </h3>
               {departmentsLoading ? (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-                  <p className="mt-3 text-gray-600">Loading departments...</p>
+                <div className="text-center py-16">
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+                  <p className="mt-4 text-xs font-bold text-stone-500 uppercase tracking-widest">Loading departments...</p>
                 </div>
               ) : departments.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -384,27 +299,28 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                       <button
                         key={deptName}
                         onClick={() => handleDepartmentSelect(deptName)}
-                        className="p-5 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                        className="p-5 border border-stone-800 bg-stone-900/50 rounded-2xl hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300 text-left group shadow-sm hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]"
                       >
                         <div
-                          className={`w-14 h-14 ${deptInfo.bgColor} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg`}
+                          className={`w-12 h-12 ${deptInfo.bgColor} rounded-xl flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-110 shadow-lg`}
                         >
                           {deptInfo.icon}
                         </div>
-                        <h3 className="font-semibold text-gray-900 text-lg">
-                          {deptName}
+                        <h3 className="font-bold text-white text-lg transition-colors group-hover:text-emerald-400">
+                          {deptInfo.displayName || deptName}
                         </h3>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-xs text-stone-400 mt-2 leading-relaxed line-clamp-2">
                           {deptInfo.description}
                         </p>
                         {dept.doctorCount !== undefined && (
-                          <div className="mt-3 flex items-center gap-2">
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                          <div className="mt-4 flex items-center gap-2">
+                            <span className="px-2.5 py-1 bg-stone-800 text-stone-300 border border-stone-700 rounded-full text-[10px] font-bold uppercase tracking-widest">
                               {dept.doctorCount}{" "}
                               {dept.doctorCount === 1 ? "Doctor" : "Doctors"}
                             </span>
                             {dept.availableDoctors > 0 && (
-                              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                              <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
+                                <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></div>
                                 {dept.availableDoctors} Available
                               </span>
                             )}
@@ -415,14 +331,14 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaUserMd className="w-10 h-10 text-gray-400" />
+                <div className="text-center py-16 bg-stone-900/50 border border-stone-800 rounded-2xl">
+                  <div className="w-16 h-16 bg-stone-800 border border-stone-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <FaUserMd className="w-6 h-6 text-stone-500" />
                   </div>
-                  <p className="text-gray-600 font-medium">
+                  <p className="text-white font-bold text-sm">
                     No departments available
                   </p>
-                  <p className="text-gray-500 text-sm mt-1">
+                  <p className="text-stone-500 text-xs mt-1 font-medium">
                     Please check back later
                   </p>
                 </div>
@@ -432,20 +348,23 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
 
           {/* Step 2: Select Doctor */}
           {step === 2 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Select Doctor - {selectedDepartment}
-                </h3>
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-widest">
+                    Select Practitioner
+                  </h3>
+                  <p className="text-white font-bold text-sm mt-1">{selectedDepartment}</p>
+                </div>
                 <Button onClick={handleBack} variant="outline" size="sm">
                   <FaArrowLeft className="mr-2" /> Back
                 </Button>
               </div>
 
               {loading ? (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-                  <p className="mt-3 text-gray-600">Loading doctors...</p>
+                <div className="text-center py-16">
+                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+                  <p className="mt-4 text-xs font-bold text-stone-500 uppercase tracking-widest">Loading practitioners...</p>
                 </div>
               ) : doctors.length > 0 ? (
                 <div className="space-y-4">
@@ -453,28 +372,28 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                     <button
                       key={doctor._id}
                       onClick={() => handleDoctorSelect(doctor)}
-                      className="w-full p-5 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
+                      className="w-full p-5 border border-stone-800 bg-stone-900/50 rounded-2xl hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300 text-left group shadow-sm hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
-                          <div className="w-16 h-16 bg-amber-600 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg group-hover:shadow-xl transition-shadow">
+                          <div className="w-14 h-14 bg-stone-800 border border-stone-700 rounded-xl flex items-center justify-center text-emerald-400 text-sm font-black uppercase tracking-widest shadow-inner group-hover:border-emerald-500/30 transition-colors">
                             {doctor.firstName?.charAt(0)}
                             {doctor.lastName?.charAt(0)}
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900 text-lg">
+                            <h4 className="font-bold text-white text-base group-hover:text-emerald-400 transition-colors">
                               Dr. {formatName(doctor)}
                             </h4>
-                            <p className="text-gray-600">
-                              {doctor.specialization}
+                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mt-1">
+                              {getSpecializationLabel(doctor.specialization)}
                             </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                              <span className="flex items-center gap-1">
-                                <FaCalendarAlt className="text-blue-500" />
-                                {doctor.experience} years exp
+                            <div className="flex items-center gap-4 mt-3 text-xs text-stone-400 font-medium">
+                              <span className="flex items-center gap-1.5">
+                                <FaCalendarAlt className="text-stone-500" />
+                                {doctor.experience} Years Exp
                               </span>
                             </div>
-                            <div className="mt-2">
+                            <div className="mt-3">
                               {doctor.isAvailable ? (
                                 <StatusBadge status="available" type="doctor" />
                               ) : (
@@ -484,11 +403,11 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-                            <p className="text-xs text-green-600 font-medium">
+                          <div className="bg-stone-950 border border-stone-800 rounded-xl px-4 py-3 shadow-inner">
+                            <p className="text-[9px] text-stone-500 font-bold uppercase tracking-widest mb-1">
                               Consultation Fee
                             </p>
-                            <p className="text-xl font-bold text-green-700">
+                            <p className="text-lg font-black text-emerald-400">
                               {doctor.consultationFee
                                 ? `₹${doctor.consultationFee}`
                                 : "N/A"}
@@ -500,14 +419,14 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaUserMd className="w-10 h-10 text-gray-400" />
+                <div className="text-center py-16 bg-stone-900/50 border border-stone-800 rounded-2xl">
+                  <div className="w-16 h-16 bg-stone-800 border border-stone-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <FaUserMd className="w-6 h-6 text-stone-500" />
                   </div>
-                  <p className="text-gray-600 font-medium">
-                    No doctors available
+                  <p className="text-white font-bold text-sm">
+                    No practitioners available
                   </p>
-                  <p className="text-gray-500 text-sm mt-1">
+                  <p className="text-stone-500 text-xs mt-1 font-medium">
                     Try selecting a different department
                   </p>
                 </div>
@@ -517,38 +436,38 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
 
           {/* Step 3: Select Date & Time */}
           {step === 3 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+              <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-6">
                 Select Date & Time
               </h3>
 
               {/* Selected Doctor Info */}
-              <div className="bg-stone-50 border border-blue-200 rounded-xl p-4 mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-14 h-14 bg-amber-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+              <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 mb-8 shadow-inner">
+                <div className="flex items-center space-x-5">
+                  <div className="w-14 h-14 bg-stone-800 border border-stone-700 rounded-xl flex items-center justify-center text-emerald-400 font-black text-sm uppercase tracking-widest shadow-inner">
                     {selectedDoctor?.firstName?.charAt(0)}
                     {selectedDoctor?.lastName?.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">
+                    <h4 className="font-bold text-white text-base">
                       Dr. {selectedDoctor && formatName(selectedDoctor)}
                     </h4>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mt-1">
                       {selectedDepartment}
                     </p>
-                    <p className="text-sm text-green-600 font-medium mt-1">
+                    <p className="text-sm text-emerald-400 font-black tracking-wide mt-2">
                       Fee: ₹{selectedDoctor?.consultationFee || "N/A"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left Column - Date & Time */}
-                <div className="space-y-5">
+                <div className="space-y-6">
                   <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                      <FaCalendarAlt className="text-blue-500" />
+                    <label className="flex items-center gap-2 text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3">
+                      <FaCalendarAlt className="text-stone-500" />
                       Select Date
                     </label>
                     <Input
@@ -556,24 +475,25 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                       value={selectedDate}
                       onChange={(e) => handleDateSelect(e.target.value)}
                       min={minDate}
+                      className="w-full bg-stone-900/50 border border-stone-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all font-medium custom-datetime"
                     />
                   </div>
 
                   {selectedDate && (
-                    <div>
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                        <FaClock className="text-blue-500" />
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                      <label className="flex items-center gap-2 text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3">
+                        <FaClock className="text-stone-500" />
                         Select Time Slot
                       </label>
-                      <div className="grid grid-cols-4 gap-2">
+                      <div className="grid grid-cols-4 gap-3">
                         {timeSlots.map((time) => (
                           <button
                             key={time}
                             onClick={() => setSelectedTime(time)}
-                            className={`p-2.5 border-2 rounded-lg text-sm font-medium transition-all ${
+                            className={`p-3 border rounded-xl text-xs font-bold transition-all duration-300 ${
                               selectedTime === time
-                                ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm"
-                                : "border-gray-200 hover:border-blue-300 text-gray-700 hover:bg-gray-50"
+                                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                                : "border-stone-800 bg-stone-900/50 hover:border-stone-700 hover:bg-stone-900 text-stone-400"
                             }`}
                           >
                             {time}
@@ -584,13 +504,13 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="flex items-center gap-2 text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3 mt-6">
                       Appointment Type
                     </label>
                     <select
                       value={appointmentType}
                       onChange={(e) => setAppointmentType(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 bg-stone-900/50 border border-stone-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all font-medium appearance-none"
                     >
                       <option value="new">New Consultation</option>
                       <option value="follow-up">Follow-up Visit</option>
@@ -599,43 +519,45 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                 </div>
 
                 {/* Right Column - Details */}
-                <div className="space-y-5">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Reason for Visit <span className="text-red-500">*</span>
+                    <label className="flex items-center gap-2 text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3">
+                      Reason for Visit <span className="text-emerald-500">*</span>
                     </label>
                     <textarea
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
-                      rows={3}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      rows={4}
+                      className="w-full px-4 py-3 bg-stone-900/50 border border-stone-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all font-medium resize-none placeholder-stone-600"
                       placeholder="Please describe your symptoms or reason for the visit..."
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Symptoms (comma separated)
+                    <label className="flex items-center gap-2 text-[10px] font-black text-stone-400 uppercase tracking-widest mb-3">
+                      Symptoms <span className="text-stone-600 lowercase">(comma separated)</span>
                     </label>
                     <Input
                       value={symptoms}
                       onChange={(e) => setSymptoms(e.target.value)}
                       placeholder="e.g., headache, fever, cough"
+                      className="w-full bg-stone-900/50 border border-stone-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all font-medium placeholder-stone-600"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-[9px] font-bold text-stone-600 uppercase tracking-widest mt-2">
                       Optional - helps the doctor prepare
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
-                <Button onClick={handleBack} variant="outline">
+              <div className="flex justify-end items-center gap-4 mt-8 pt-6 border-t border-stone-800">
+                <Button onClick={handleBack} variant="outline" className="border-stone-700 text-stone-400 hover:text-white hover:bg-stone-800">
                   Back
                 </Button>
                 <Button
                   onClick={handleContinueToConfirm}
                   disabled={!selectedDate || !selectedTime || !reason.trim()}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:shadow-none"
                 >
                   Continue to Confirm
                 </Button>
@@ -645,98 +567,92 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
 
           {/* Step 4: Confirmation */}
           {step === 4 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+              <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-6">
                 Confirm Your Appointment
               </h3>
 
-              <div className="bg-white border-2 border-gray-100 rounded-xl overflow-hidden">
+              <div className="bg-stone-900 border border-stone-800 rounded-2xl overflow-hidden shadow-inner mb-6">
                 {/* Doctor Card */}
-                <div className="bg-amber-600 p-5 text-white">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white text-xl font-bold">
+                <div className="bg-stone-950/50 border-b border-stone-800 p-6">
+                  <div className="flex items-center space-x-5">
+                    <div className="w-14 h-14 bg-stone-800 border border-stone-700 rounded-xl flex items-center justify-center text-emerald-400 font-black text-sm uppercase tracking-widest shadow-inner">
                       {selectedDoctor?.firstName?.charAt(0)}
                       {selectedDoctor?.lastName?.charAt(0)}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-lg">
+                      <h4 className="font-bold text-white text-lg">
                         Dr. {selectedDoctor && formatName(selectedDoctor)}
                       </h4>
-                      <p className="text-blue-100">{selectedDepartment}</p>
+                      <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mt-1">{selectedDepartment}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Appointment Details */}
-                <div className="p-5 space-y-4">
+                <div className="p-6 space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <FaCalendarAlt className="text-blue-600" />
+                    <div className="flex flex-col gap-2 p-4 bg-stone-950/30 border border-stone-800 rounded-xl">
+                      <div className="flex items-center gap-2 text-[10px] font-black text-stone-500 uppercase tracking-widest">
+                        <FaCalendarAlt className="text-stone-600" />
+                        Date
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Date</p>
-                        <p className="font-semibold text-gray-900">
-                          {selectedDate &&
-                            new Date(selectedDate).toLocaleDateString("en-US", {
-                              weekday: "short",
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                        </p>
-                      </div>
+                      <p className="font-bold text-white text-sm">
+                        {selectedDate &&
+                          new Date(selectedDate).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                      </p>
                     </div>
 
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                        <FaClock className="text-purple-600" />
+                    <div className="flex flex-col gap-2 p-4 bg-stone-950/30 border border-stone-800 rounded-xl">
+                      <div className="flex items-center gap-2 text-[10px] font-black text-stone-500 uppercase tracking-widest">
+                        <FaClock className="text-stone-600" />
+                        Time
                       </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Time</p>
-                        <p className="font-semibold text-gray-900">
-                          {selectedTime}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <FaMoneyBillWave className="text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Consultation Fee</p>
-                      <p className="font-semibold text-green-700 text-lg">
-                        ₹{selectedDoctor?.consultationFee || "N/A"}
+                      <p className="font-bold text-white text-sm">
+                        {selectedTime}
                       </p>
                     </div>
                   </div>
 
-                  <div className="border-t pt-4">
-                    <div className="space-y-3">
+                  <div className="flex items-center justify-between p-4 bg-stone-950/50 border border-stone-800 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center">
+                        <FaMoneyBillWave className="text-emerald-500" />
+                      </div>
+                      <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest">Consultation Fee</p>
+                    </div>
+                    <p className="font-black text-emerald-400 text-lg">
+                      ₹{selectedDoctor?.consultationFee || "N/A"}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-stone-800 pt-6">
+                    <div className="space-y-5">
                       <div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1">
                           Appointment Type
                         </p>
-                        <p className="font-medium text-gray-900 capitalize">
+                        <p className="font-bold text-white text-sm capitalize">
                           {appointmentType === "new"
                             ? "New Consultation"
                             : "Follow-up Visit"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1">
                           Reason for Visit
                         </p>
-                        <p className="font-medium text-gray-900">{reason}</p>
+                        <p className="font-bold text-white text-sm leading-relaxed">{reason}</p>
                       </div>
                       {symptoms && (
                         <div>
-                          <p className="text-xs text-gray-500">Symptoms</p>
-                          <p className="font-medium text-gray-900">
-                            {symptoms}
-                          </p>
+                          <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1">Symptoms</p>
+                          <p className="font-bold text-stone-300 text-sm">{symptoms}</p>
                         </div>
                       )}
                     </div>
@@ -744,24 +660,25 @@ const BookAppointmentModal = ({ isOpen, onClose, onSuccess, toast }) => {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Important:</strong> By confirming, you agree to attend
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 mb-8">
+                <p className="text-xs text-emerald-300/80 leading-relaxed font-medium">
+                  <strong className="text-emerald-400">Important:</strong> By confirming, you agree to attend
                   the appointment at the scheduled time. Please arrive 10
                   minutes early. Cancellation should be done at least 24 hours
                   in advance.
                 </p>
               </div>
 
-              <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+              <div className="flex justify-end items-center gap-4 pt-6 border-t border-stone-800">
                 <Button
                   onClick={handleBack}
                   variant="outline"
                   disabled={loading}
+                  className="border-stone-700 text-stone-400 hover:text-white hover:bg-stone-800"
                 >
                   Back
                 </Button>
-                <Button onClick={handleSubmitAppointment} disabled={loading}>
+                <Button onClick={handleSubmitAppointment} disabled={loading} className="bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:shadow-none min-w-[200px]">
                   {loading ? (
                     <>
                       <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>

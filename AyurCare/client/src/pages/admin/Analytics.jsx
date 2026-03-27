@@ -4,6 +4,7 @@ import Button from "../../components/common/Button";
 import { useToast } from "../../hooks/useToast";
 import { ToastContainer } from "../../components/common/Toast";
 import api from "../../services/api";
+import { getSpecializationLabel } from "../../utils/specializations";
 import {
   FaChartLine,
   FaMoneyBillWave,
@@ -258,7 +259,7 @@ const Analytics = () => {
           const specialization = d.specialization || "General";
           if (!deptMap[specialization]) {
             deptMap[specialization] = {
-              name: specialization,
+              name: getSpecializationLabel(specialization),
               patients: 0,
               revenue: 0,
               avgWait: 0,
@@ -304,7 +305,7 @@ const Analytics = () => {
           .slice(0, 5)
           .map((d) => ({
             name: `Dr. ${d.firstName} ${d.lastName}`,
-            specialty: d.specialization || "General",
+            specialty: getSpecializationLabel(d.specialization) || "General",
             patients: d.totalPatients || 0,
             revenue: (d.totalAppointments || 0) * (d.consultationFee || 100),
             rating: 4.5 + Math.random() * 0.4, // Would need actual rating system

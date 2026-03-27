@@ -17,6 +17,16 @@ const planStageSchema = new mongoose.Schema({
   notes: String,
 }, { _id: false });
 
+const sessionScheduleSchema = new mongoose.Schema({
+  dayOfWeek: {
+    type: String,
+    enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+    required: true,
+  },
+  time: { type: String, required: true }, // "HH:MM" 24h format, e.g. "09:00"
+  durationMinutes: { type: Number, default: 60 },
+}, { _id: false });
+
 const treatmentPlanSchema = new mongoose.Schema({
   patient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   practitioner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -27,6 +37,8 @@ const treatmentPlanSchema = new mongoose.Schema({
   totalSessions: { type: Number, default: 0 },
   completedSessions: { type: Number, default: 0 },
   stages: [planStageSchema],
+  sessionSchedule: [sessionScheduleSchema], // Fixed weekly recurring schedule
+  therapyRoom: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapyRoom' },
   status: {
     type: String,
     enum: ['draft', 'active', 'paused', 'completed', 'cancelled'],

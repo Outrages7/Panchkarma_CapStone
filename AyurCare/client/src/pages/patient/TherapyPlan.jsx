@@ -8,7 +8,10 @@ import {
   FaAppleAlt,
   FaHeart,
   FaBullseye,
+  FaCalendarAlt,
+  FaRegClock,
 } from "react-icons/fa";
+
 
 const StageCard = ({ stage }) => {
   const [open, setOpen] = useState(false);
@@ -91,14 +94,31 @@ const StageCard = ({ stage }) => {
   );
 };
 
+const STAGE_LABELS = { purvakarma: "Purva Karma", pradhanakarma: "Pradhana Karma", paschatkarma: "Paschat Karma" };
+const STAGE_COLORS = {
+  purvakarma: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+  pradhanakarma: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  paschatkarma: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+};
+
 const TherapyPlan = () => {
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [upcomingSessions, setUpcomingSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchPlans();
   }, []);
+
+  useEffect(() => {
+    if (selectedPlan?._id) {
+      fetchUpcomingSessions(selectedPlan._id);
+    } else {
+      setUpcomingSessions([]);
+    }
+  }, [selectedPlan]);
 
   const fetchPlans = async () => {
     try {
@@ -110,6 +130,18 @@ const TherapyPlan = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUpcomingSessions = async (planId) => {
+    try {
+      setSessionsLoading(true);
+      const res = await api.get(`/treatment-plans/${planId}/sessions?upcoming=true`);
+      setUpcomingSessions(res.data.data || []);
+    } catch {
+      setUpcomingSessions([]);
+    } finally {
+      setSessionsLoading(false);
     }
   };
 
@@ -201,6 +233,30 @@ const TherapyPlan = () => {
                     </div>
                   </div>
 
+                  {/* Fixed session schedule — shown when practitioner has set it */}
+                  {selectedPlan.sessionSchedule?.length > 0 && (
+                    <div className="mb-6 bg-stone-950 rounded-2xl p-4 border border-stone-800">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-3 flex items-center gap-2">
+                        <FaRegClock className="w-3 h-3 text-emerald-500" />
+                        Fixed Weekly Schedule
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedPlan.sessionSchedule.map((slot, i) => (
+                          <div key={i} className="flex items-center gap-1.5 bg-stone-900 border border-stone-700 rounded-xl px-3 py-2">
+                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">
+                              {slot.dayOfWeek.slice(0, 3).toUpperCase()}
+                            </span>
+                            <span className="w-px h-3 bg-stone-700" />
+                            <span className="text-xs font-bold text-white">{slot.time}</span>
+                            {slot.durationMinutes && (
+                              <span className="text-[10px] text-stone-500 font-semibold">{slot.durationMinutes}m</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Progress */}
                   <div className="mb-8 bg-stone-50 rounded-2xl p-5 border border-stone-100">
                     <div className="flex justify-between items-end mb-2">
@@ -261,6 +317,74 @@ const TherapyPlan = () => {
                     )}
                   </div>
                 )}
+
+                {/* === Upcoming Scheduled Sessions === */}
+                <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-6">
+                  <div className="flex items-center gap-3 mb-5 border-b border-stone-100 pb-4">
+                    <div className="w-9 h-9 bg-stone-950 rounded-xl flex items-center justify-center">
+                      <FaCalendarAlt className="text-emerald-400 w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-stone-900">Upcoming Sessions</h3>
+                      <p className="text-xs text-stone-400 font-medium">Auto-scheduled by your practitioner</p>
+                    </div>
+                  </div>
+
+                  {sessionsLoading ? (
+                    <div className="flex justify-center py-6">
+                      <div className="w-6 h-6 border-2 border-stone-200 border-t-emerald-500 rounded-full animate-spin" />
+                    </div>
+                  ) : upcomingSessions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 bg-stone-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <FaRegClock className="w-5 h-5 text-stone-400" />
+                      </div>
+                      <p className="text-sm font-semibold text-stone-500">No sessions scheduled yet</p>
+                      <p className="text-xs text-stone-400 mt-1">Your practitioner will set up a recurring schedule for you</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                      {upcomingSessions.map((session, i) => {
+                        const d = new Date(session.scheduledDate);
+                        return (
+                          <div key={session._id} className="flex items-center gap-4 p-3.5 rounded-2xl border border-stone-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all">
+                            {/* Date block */}
+                            <div className="w-12 shrink-0 text-center bg-stone-950 rounded-xl py-2">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+                                {d.toLocaleDateString("en-IN", { month: "short" })}
+                              </p>
+                              <p className="text-xl font-black text-white leading-none">{d.getDate()}</p>
+                              <p className="text-[10px] font-bold text-stone-400">{d.toLocaleDateString("en-IN", { weekday: "short" })}</p>
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-black text-stone-900">Session #{session.sessionNumber}</span>
+                                <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${STAGE_COLORS[session.stage] || STAGE_COLORS.pradhanakarma}`}>
+                                  {STAGE_LABELS[session.stage] || session.stage}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold">
+                                <FaRegClock className="w-3 h-3" />
+                                {d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                                {session.durationMinutes && <span className="text-stone-400">· {session.durationMinutes} min</span>}
+                              </div>
+                              {session.therapyRoom && (
+                                <p className="text-[10px] text-stone-400 font-medium mt-0.5">{session.therapyRoom.name}</p>
+                              )}
+                            </div>
+
+                            <div className={`shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                              session.status === "scheduled" ? "bg-emerald-100 text-emerald-700" :
+                              session.status === "in-progress" ? "bg-blue-100 text-blue-700" :
+                              "bg-stone-100 text-stone-500"
+                            }`}>{session.status}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
 
                 {/* Stages breakdown */}
                 {selectedPlan.stages?.length > 0 && (

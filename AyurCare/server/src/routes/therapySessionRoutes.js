@@ -7,11 +7,13 @@ router.use(protect);
 
 // Patient
 router.get('/my-sessions', authorize('patient'), sessionController.getPatientSessions);
+router.get('/pending-feedback', authorize('patient'), sessionController.getPendingFeedback);
 router.post('/:id/feedback', authorize('patient'), sessionController.submitFeedback);
 router.post('/:id/report-symptoms', authorize('patient'), sessionController.reportSymptoms);
 
 // Doctor
 router.get('/today', authorize('doctor'), sessionController.getTodaySessions);
+router.get('/overdue', authorize('doctor'), sessionController.getOverdueSessions);
 router.get('/practitioner-sessions', authorize('doctor'), sessionController.getPractitionerSessions);
 router.post('/', authorize('doctor'), sessionController.createSession);
 router.patch('/:id/start', authorize('doctor'), sessionController.startSession);

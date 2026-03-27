@@ -328,9 +328,9 @@ const TherapyTypes = () => {
                         </div>
                      </div>
 
-                     <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-5 space-y-4">
-                        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1 flex items-center gap-2">
-                           <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Value Metrics
+                     <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-5 space-y-4">
+                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1 flex items-center gap-2">
+                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Value Metrics
                         </p>
                         <div className="grid grid-cols-2 gap-3">
                            <div>
@@ -340,7 +340,7 @@ const TherapyTypes = () => {
                                value={form.estimatedCost}
                                onChange={e => setForm(f => ({ ...f, estimatedCost: e.target.value }))}
                                placeholder="15000"
-                               className="w-full bg-white border border-amber-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-300 placeholder:font-medium text-amber-900"
+                               className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300 placeholder:font-medium text-emerald-900"
                              />
                            </div>
                            <div>
@@ -350,7 +350,7 @@ const TherapyTypes = () => {
                                value={form.successRate}
                                onChange={e => setForm(f => ({ ...f, successRate: e.target.value }))}
                                placeholder="85"
-                               className="w-full bg-white border border-amber-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-300 placeholder:font-medium text-amber-900"
+                               className="w-full bg-white border border-emerald-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-stone-300 placeholder:font-medium text-emerald-900"
                              />
                            </div>
                         </div>

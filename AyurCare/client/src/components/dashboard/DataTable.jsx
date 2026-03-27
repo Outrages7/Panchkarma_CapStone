@@ -47,7 +47,7 @@ const DataTable = ({
   }
 
   return (
-    <div className="overflow-x-auto -mx-6">
+    <div className="overflow-x-auto">
       <table className="min-w-full">
         <thead>
           <tr className="border-b border-stone-100">
@@ -55,7 +55,7 @@ const DataTable = ({
               <th
                 key={column.key}
                 scope="col"
-                className={`px-6 py-2.5 text-left text-[11px] font-medium text-stone-400 uppercase tracking-wider ${
+                className={`px-6 py-4 text-left text-[11px] font-medium text-stone-400 uppercase tracking-wider ${
                   column.sortable ? 'cursor-pointer hover:text-stone-600' : ''
                 }`}
                 onClick={() => column.sortable && handleSort(column.key)}
@@ -87,7 +87,7 @@ const DataTable = ({
               onClick={() => onRowClick && onRowClick(row)}
             >
               {columns.map((column) => (
-                <td key={column.key} className="px-6 py-3 whitespace-nowrap text-sm text-stone-700">
+                <td key={column.key} className="px-6 py-5 whitespace-nowrap text-sm text-stone-700">
                   {column.render ? column.render(row) : row[column.key]}
                 </td>
               ))}

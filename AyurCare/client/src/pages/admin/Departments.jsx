@@ -2,24 +2,44 @@ import { useState, useEffect } from "react";
 import {
   FaHeartbeat,
   FaBrain,
-  FaBone,
   FaBaby,
-  FaAllergies,
-  FaStethoscope,
   FaEye,
-  FaLungs,
-  FaTooth,
   FaUserMd,
   FaBuilding,
   FaUsers,
   FaCalendarAlt,
+  FaLeaf,
+  FaHeart,
+  FaSeedling,
+  FaShieldAlt,
+  FaCut,
 } from "react-icons/fa";
-import { GiKidneys, GiStomach } from "react-icons/gi";
+import { FaSpa } from "react-icons/fa6";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import SearchBar from "../../components/common/SearchBar";
 import { useToast } from "../../hooks/useToast";
 import { ToastContainer } from "../../components/common/Toast";
+import { getSpecializationInfo } from "../../utils/specializations";
 import api from "../../services/api";
+
+// Map icon name strings to actual React icon components
+const ICON_MAP = {
+  FaHeartbeat,
+  FaBrain,
+  FaBaby,
+  FaEye,
+  FaUserMd,
+  FaLeaf,
+  FaHeart,
+  FaSeedling,
+  FaShieldAlt,
+  FaCut,
+  FaSpa,
+};
+
+const getIcon = (iconName) => {
+  const IconComponent = ICON_MAP[iconName] || FaUserMd;
+  return <IconComponent className="w-6 h-6 text-white" />;
+};
 
 const Departments = () => {
   const { toasts, toast, removeToast } = useToast();
@@ -27,76 +47,6 @@ const Departments = () => {
   const [loading, setLoading] = useState(true);
   const [departments, setDepartments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Department info with icons
-  const getDepartmentInfo = (dept) => {
-    const deptLower = dept.toLowerCase();
-    const departmentMap = {
-      cardiology: {
-        icon: <FaHeartbeat className="w-6 h-6 text-white" />,
-        bgColor: "bg-red-500",
-        description: "Heart and cardiovascular care",
-      },
-      neurology: {
-        icon: <FaBrain className="w-6 h-6 text-white" />,
-        bgColor: "bg-purple-600",
-        description: "Brain and nervous system",
-      },
-      orthopedics: {
-        icon: <FaBone className="w-6 h-6 text-white" />,
-        bgColor: "bg-amber-600",
-        description: "Bones, joints, and muscles",
-      },
-      pediatrics: {
-        icon: <FaBaby className="w-6 h-6 text-white" />,
-        bgColor: "bg-pink-500",
-        description: "Child healthcare specialists",
-      },
-      dermatology: {
-        icon: <FaAllergies className="w-6 h-6 text-white" />,
-        bgColor: "bg-teal-500",
-        description: "Skin, hair, and nail care",
-      },
-      "general medicine": {
-        icon: <FaStethoscope className="w-6 h-6 text-white" />,
-        bgColor: "bg-amber-600",
-        description: "Primary healthcare services",
-      },
-      ophthalmology: {
-        icon: <FaEye className="w-6 h-6 text-white" />,
-        bgColor: "bg-sky-500",
-        description: "Eye care and vision",
-      },
-      pulmonology: {
-        icon: <FaLungs className="w-6 h-6 text-white" />,
-        bgColor: "bg-cyan-500",
-        description: "Lung and respiratory care",
-      },
-      dentistry: {
-        icon: <FaTooth className="w-6 h-6 text-white" />,
-        bgColor: "bg-emerald-500",
-        description: "Dental and oral health",
-      },
-      nephrology: {
-        icon: <GiKidneys className="w-6 h-6 text-white" />,
-        bgColor: "bg-rose-500",
-        description: "Kidney care specialists",
-      },
-      gastroenterology: {
-        icon: <GiStomach className="w-6 h-6 text-white" />,
-        bgColor: "bg-yellow-500",
-        description: "Digestive system care",
-      },
-    };
-
-    return (
-      departmentMap[deptLower] || {
-        icon: <FaUserMd className="w-6 h-6 text-white" />,
-        bgColor: "bg-stone-500",
-        description: "Specialized medical care",
-      }
-    );
-  };
 
   useEffect(() => {
     fetchDepartments();
@@ -114,9 +64,14 @@ const Departments = () => {
     }
   };
 
-  const filteredDepartments = departments.filter((dept) =>
-    dept.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDepartments = departments.filter((dept) => {
+    const info = getSpecializationInfo(dept.name);
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      dept.name.toLowerCase().includes(searchLower) ||
+      info.displayName.toLowerCase().includes(searchLower)
+    );
+  });
 
   const totalDoctors = departments.reduce(
     (sum, dept) => sum + (dept.totalDoctors || 0),
@@ -231,7 +186,7 @@ const Departments = () => {
         ) : filteredDepartments.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDepartments.map((department) => {
-              const deptInfo = getDepartmentInfo(department.name);
+              const deptInfo = getSpecializationInfo(department.name);
               return (
                 <div
                   key={department.name}
@@ -242,11 +197,11 @@ const Departments = () => {
                       <div
                         className={`w-16 h-16 ${deptInfo.bgColor} rounded-2xl flex items-center justify-center shadow-md transform hover:scale-105 transition-transform`}
                       >
-                        {deptInfo.icon}
+                        {getIcon(deptInfo.iconName)}
                       </div>
                       <div className="flex-1 mt-1">
                         <h3 className="text-xl font-bold text-stone-900 tracking-tight leading-tight">
-                          {department.name}
+                          {deptInfo.displayName}
                         </h3>
                         <p className="text-xs font-semibold uppercase tracking-wider text-stone-500 mt-2">
                           {deptInfo.description}
