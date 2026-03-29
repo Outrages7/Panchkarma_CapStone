@@ -9,6 +9,7 @@ import {
   refreshAccessToken,
   getMe,
   logout,
+  sendOtp,
 } from '../controllers/authController.js';
 import { protect } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
@@ -47,6 +48,10 @@ const resetPasswordValidation = [
 ];
 
 // Public routes
+router.post('/send-otp', [
+  body('email').isEmail().normalizeEmail({ gmail_remove_dots: false }).withMessage('Please provide a valid email'),
+], validate, sendOtp);
+
 router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, login);
 router.get('/verify-email/:token', verifyEmail);

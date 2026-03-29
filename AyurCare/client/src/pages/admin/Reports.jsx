@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import LineChart from "../../components/dashboard/LineChart";
 import BarChart from "../../components/dashboard/BarChart";
+import DataTable from "../../components/dashboard/DataTable";
 import api from "../../services/api";
 import { FaFileAlt, FaDownload, FaChartBar, FaUsers, FaLeaf, FaStar } from "react-icons/fa";
 
@@ -59,6 +60,54 @@ const Reports = () => {
 
   const totalRevenue = therapyBreakdown.reduce((sum, t) => sum + t.revenue, 0);
   const totalSessions = therapyBreakdown.reduce((sum, t) => sum + t.count, 0);
+
+  const therapyColumns = [
+    {
+      key: "name",
+      label: "Target Modality",
+      sortable: true,
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+             <FaLeaf className="w-3.5 h-3.5" />
+          </div>
+          <span className="font-bold text-stone-900 text-sm">{row.name}</span>
+        </div>
+      )
+    },
+    {
+      key: "count",
+      label: "Frequency Base",
+      sortable: true,
+      render: (row) => (
+        <span className="text-sm font-semibold text-stone-600 bg-stone-100 px-2.5 py-1 rounded-lg">{row.count}</span>
+      )
+    },
+    {
+      key: "revenue",
+      label: "Monetary Yield",
+      sortable: true,
+      render: (row) => (
+        <span className="text-sm font-black text-stone-900">₹{row.revenue.toLocaleString("en-IN")}</span>
+      )
+    },
+    {
+      key: "share",
+      label: "Earning Share",
+      sortable: false,
+      render: (row) => (
+        <div className="flex justify-start gap-3 flex-col sm:flex-row items-start sm:items-center">
+          <div className="w-full sm:w-24 bg-stone-100 rounded-full h-1.5 order-2 sm:order-1 relative overflow-hidden">
+            <div
+              className="bg-purple-500 h-1.5 rounded-full absolute top-0 left-0 bottom-0 transition-all duration-500"
+              style={{ width: `${Math.round((row.revenue / totalRevenue) * 100)}%` }}
+            />
+          </div>
+          <span className="text-xs font-bold text-stone-500 order-1 sm:order-2 w-8 text-right bg-stone-50 px-2 py-0.5 rounded-md border border-stone-100">{Math.round((row.revenue / totalRevenue) * 100)}%</span>
+        </div>
+      )
+    }
+  ];
 
   const downloadCSV = (data, filename) => {
     const keys = Object.keys(data[0] || {});
@@ -261,50 +310,14 @@ const Reports = () => {
                    </button>
                  </div>
                  <div className="overflow-x-auto">
+                   <DataTable columns={therapyColumns} data={therapyBreakdown} />
                    <table className="w-full">
-                     <thead>
-                       <tr className="bg-white">
-                         <th className="text-left text-[10px] font-black text-stone-400 uppercase tracking-widest px-8 py-4 border-b border-stone-100 w-1/3">Target Modality</th>
-                         <th className="text-right text-[10px] font-black text-stone-400 uppercase tracking-widest px-4 py-4 border-b border-stone-100">Frequency Base</th>
-                         <th className="text-right text-[10px] font-black text-stone-400 uppercase tracking-widest px-4 py-4 border-b border-stone-100">Monetary Yield</th>
-                         <th className="text-right text-[10px] font-black text-stone-400 uppercase tracking-widest px-8 py-4 border-b border-stone-100">Earning Share Distribution</th>
-                       </tr>
-                     </thead>
-                     <tbody className="divide-y divide-stone-50">
-                       {therapyBreakdown.map(t => (
-                         <tr key={t.name} className="hover:bg-stone-50/50 transition-colors">
-                           <td className="px-8 py-5">
-                             <div className="flex items-center gap-3">
-                               <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                                  <FaLeaf className="w-3.5 h-3.5" />
-                               </div>
-                               <span className="font-bold text-stone-900 text-sm">{t.name}</span>
-                             </div>
-                           </td>
-                           <td className="px-4 py-5 text-right">
-                             <span className="text-sm font-semibold text-stone-600 bg-stone-100 px-2.5 py-1 rounded-lg">{t.count}</span>
-                           </td>
-                           <td className="px-4 py-5 text-right">
-                             <span className="text-sm font-black text-stone-900">₹{t.revenue.toLocaleString("en-IN")}</span>
-                           </td>
-                           <td className="px-8 py-5 text-right">
-                             <div className="flex justify-end gap-3 flex-col sm:flex-row items-end sm:items-center">
-                               <div className="w-full sm:w-24 bg-stone-100 rounded-full h-1.5 order-2 sm:order-1 relative overflow-hidden">
-                                 <div
-                                   className="bg-purple-500 h-1.5 rounded-full absolute top-0 left-0 bottom-0"
-                                   style={{ width: `${Math.round((t.revenue / totalRevenue) * 100)}%` }}
-                                 />
-                               </div>
-                               <span className="text-xs font-bold text-stone-500 order-1 sm:order-2 w-8 text-right bg-stone-50 px-2 py-0.5 rounded-md border border-stone-100">{Math.round((t.revenue / totalRevenue) * 100)}%</span>
-                             </div>
-                           </td>
-                         </tr>
-                       ))}
+                     <tbody>
                        <tr className="bg-stone-900 border-t-2 border-stone-950">
-                         <td className="px-8 py-4 font-black text-white text-sm uppercase tracking-widest text-[10px]">Net Computations</td>
-                         <td className="px-4 py-4 text-right font-black text-emerald-400 text-sm bg-stone-800/50">{totalSessions} Vol</td>
-                         <td className="px-4 py-4 text-right font-black text-emerald-400 text-sm bg-stone-800/50">₹{totalRevenue.toLocaleString("en-IN")}</td>
-                         <td className="px-8 py-4 text-right text-[10px] font-black text-stone-500 bg-stone-800/50 flex justify-end"><span className="border border-stone-700 w-max inline-block px-3 py-1 rounded-md">100.0% Aggregate Share</span></td>
+                         <td className="px-6 py-4 font-black text-white text-sm uppercase tracking-widest text-[10px] w-1/4">Net Computations</td>
+                         <td className="px-6 py-4 font-black text-emerald-400 text-sm bg-stone-800/50">{totalSessions} Vol</td>
+                         <td className="px-6 py-4 font-black text-emerald-400 text-sm bg-stone-800/50">₹{totalRevenue.toLocaleString("en-IN")}</td>
+                         <td className="px-6 py-4 text-[10px] font-black text-stone-500 bg-stone-800/50 text-right"><span className="border border-stone-700 w-max inline-block px-3 py-1 rounded-md">100.0% Aggregate Share</span></td>
                        </tr>
                      </tbody>
                    </table>

@@ -1,7 +1,49 @@
 import crypto from "crypto";
 import User from "../models/User.js";
+import Otp from "../models/Otp.js";
 import { generateTokens, verifyRefreshToken } from "../utils/generateToken.js";
-import { notifyNewDoctorRegistered } from "../utils/notificationService.js";
+import { notifyNewDoctorRegistered, sendOtpEmail } from "../utils/notificationService.js";
+
+/**
+ * @desc    Generate and send 6-digit OTP to email
+ * @route   POST /api/auth/send-otp
+ * @access  Public
+ */
+export const sendOtp = async (req, res, next) => {
+  try {
+    const { email, firstName } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "USER_EXISTS", message: "User with this email already exists" }
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store in DB, overwriting any previous unexpired OTP
+    await Otp.findOneAndDelete({ email });
+    await Otp.create({ email, otp: otpCode });
+
+    // Send the email
+    await sendOtpEmail({
+      to: email,
+      otp: otpCode,
+      userName: firstName || "there",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent to your email successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * @desc    Register new user
@@ -13,12 +55,32 @@ export const register = async (req, res, next) => {
     const {
       email,
       password,
+      otp,
       firstName,
       lastName,
       phone,
       role,
       ...otherFields
     } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "OTP_REQUIRED", message: "An OTP is required to register. Please verify your email." }
+      });
+    }
+
+    // Check OTP
+    const validOtp = await Otp.findOne({ email, otp });
+    if (!validOtp) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "INVALID_OTP", message: "The OTP is invalid or has expired." }
+      });
+    }
+
+    // Clear the OTP because it was used
+    await Otp.deleteOne({ _id: validOtp._id });
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });

@@ -48,7 +48,7 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       const res = await api.get("/auth/me");
-      const freshUser = res.data.data || res.data.user || res.data;
+      const freshUser = res.data.data?.user || res.data.data || res.data.user || res.data;
       setUser(freshUser);
     } catch (err) {
       console.error("Failed to fetch profile:", err);

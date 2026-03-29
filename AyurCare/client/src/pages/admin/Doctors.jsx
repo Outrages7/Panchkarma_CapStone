@@ -210,7 +210,8 @@ const Doctors = () => {
       );
       toast.success(`Dr. ${formatName(selectedDoctor)} has been approved`);
       setShowApprovalModal(false);
-      setSelectedDoctor(null);
+      setShowDetailsModal(false); // Make sure details modal is also closed
+      setTimeout(() => setSelectedDoctor(null), 300); // Delay clearing selection to allow animations to finish without crashing
       fetchDoctors(); // Refresh the list
     } catch (error) {
       toast.error("Failed to approve doctor");

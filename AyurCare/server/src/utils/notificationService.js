@@ -303,4 +303,32 @@ export const sendResetPasswordEmail = async ({ to, userName, resetUrl }) => {
   return sendEmail({ to, subject: 'AyurCare — Reset Your Password', html });
 };
 
+export const sendOtpEmail = async ({ to, otp, userName = "there" }) => {
+  const html = `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:520px;margin:0 auto;background:#fafaf9;border:1px solid #e7e5e4;border-radius:24px;overflow:hidden;">
+      <div style="background:#0c0a09;padding:32px 28px 20px;">
+        <h1 style="margin:0;color:#fff;font-size:20px;font-weight:800;letter-spacing:-0.5px;">🌿 AyurCare</h1>
+      </div>
+      <div style="padding:28px;">
+        <p style="margin:0 0 6px;color:#78716c;font-size:13px;">Hello ${userName},</p>
+        <h2 style="margin:0 0 12px;color:#1c1917;font-size:18px;font-weight:800;">Verify Your Email</h2>
+        <p style="margin:0 0 20px;color:#44403c;font-size:14px;line-height:1.6;">
+          Thank you for signing up for AyurCare. Please use the following 6-digit OTP code to verify your email address. This code will expire in 10 minutes.
+        </p>
+        <div style="display:inline-block;padding:14px 32px;background:#fef3c7;color:#b45309;border:1px solid #fcd34d;border-radius:12px;font-weight:900;font-size:24px;letter-spacing:6px;text-align:center;">
+          ${otp}
+        </div>
+        <p style="margin:20px 0 0;color:#78716c;font-size:12px;line-height:1.5;">
+          If you didn't request this, you can safely ignore this email.
+        </p>
+      </div>
+      <div style="padding:16px 28px;background:#f5f5f4;border-top:1px solid #e7e5e4;text-align:center;">
+        <p style="margin:0;color:#a8a29e;font-size:11px;">This is an automated email from AyurCare. Do not reply.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail({ to, subject: 'AyurCare — Your Verification Code', html });
+};
+
 export default createNotification;

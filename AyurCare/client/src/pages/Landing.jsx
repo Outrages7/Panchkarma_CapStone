@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaLeaf,
@@ -29,11 +29,14 @@ import {
   FaCheck,
   FaPlay,
   FaQuoteLeft,
+  FaTimes,
 } from "react-icons/fa";
+import VideoModal from "../components/common/VideoModal";
 
 const Landing = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [activeVideo, setActiveVideo] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -251,6 +254,14 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Video Modal component */}
+      <VideoModal
+        isOpen={!!activeVideo}
+        onClose={() => setActiveVideo(null)}
+        videoId={activeVideo?.videoId}
+        title={`${activeVideo?.name} Educational Walkthrough`}
+      />
+
       {/* ─── Therapies ─── */}
       <section id="therapies" className="py-32 px-6 relative">
         <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-stone-800 to-transparent"></div>
@@ -271,13 +282,17 @@ const Landing = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { name: "Vamana", icon: FaWater, desc: "Therapeutic emesis protocol targeting upper bio-cavity Kapha accumulation. Optimizes respiratory and lipid metabolism.", dosha: "Kapha", days: 14, glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]", color: "text-blue-400" },
-              { name: "Virechana", icon: FaLeaf, desc: "Controlled purgation mechanics for systemic Pitta clearance. Re-establishes hepatic enzyme baselines.", dosha: "Pitta", days: 15, glow: "group-hover:shadow-[0_0_30px_rgba(239,68,68,0.15)]", color: "text-red-400" },
-              { name: "Basti", icon: FaTint, desc: "Deep colonic enema architecture mapping directly to Vata origins. Restores nervous system plasticity.", dosha: "Vata", days: 16, glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]", color: "text-purple-400" },
-              { name: "Nasya", icon: FaWind, desc: "Supra-clavicular administration bypassing blood-brain thresholds. Clears neuro-sensory pathways.", dosha: "Kapha/Vata", days: 10, glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]", color: "text-blue-400" },
-              { name: "Raktamokshana", icon: FaHeartbeat, desc: "Micro-venesection protocol eliminating deep-tissue toxicity and blood-borne pathologies rapidly.", dosha: "Pitta", days: 7, glow: "group-hover:shadow-[0_0_30px_rgba(239,68,68,0.15)]", color: "text-red-400" },
+              { name: "Vamana", icon: FaWater, desc: "Therapeutic emesis protocol targeting upper bio-cavity Kapha accumulation. Optimizes respiratory and lipid metabolism.", dosha: "Kapha", days: 14, glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]", color: "text-blue-400", videoId: "XQZ5zJ-T8Uo" },
+              { name: "Virechana", icon: FaLeaf, desc: "Controlled purgation mechanics for systemic Pitta clearance. Re-establishes hepatic enzyme baselines.", dosha: "Pitta", days: 15, glow: "group-hover:shadow-[0_0_30px_rgba(239,68,68,0.15)]", color: "text-red-400", videoId: "i9L-26B22sU" },
+              { name: "Basti", icon: FaTint, desc: "Deep colonic enema architecture mapping directly to Vata origins. Restores nervous system plasticity.", dosha: "Vata", days: 16, glow: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]", color: "text-purple-400", videoId: "HpHrTj3h6_s" },
+              { name: "Nasya", icon: FaWind, desc: "Supra-clavicular administration bypassing blood-brain thresholds. Clears neuro-sensory pathways.", dosha: "Kapha/Vata", days: 10, glow: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]", color: "text-blue-400", videoId: "3dY_8K8079M" },
+              { name: "Raktamokshana", icon: FaHeartbeat, desc: "Micro-venesection protocol eliminating deep-tissue toxicity and blood-borne pathologies rapidly.", dosha: "Pitta", days: 7, glow: "group-hover:shadow-[0_0_30px_rgba(239,68,68,0.15)]", color: "text-red-400", videoId: "vBf4bZ_UqDk" },
             ].map((t, i) => (
-              <div key={t.name} className={`group bg-stone-900/50 backdrop-blur-sm border border-stone-800 hover:border-stone-700 hover:bg-stone-900 rounded-[2rem] p-8 transition-all duration-500 ${t.glow} relative overflow-hidden ${i === 3 ? 'lg:col-span-1 lg:col-start-1 lg:ml-auto' : ''} ${i === 4 ? 'lg:col-span-1' : ''}`}>
+              <div 
+                key={t.name} 
+                onClick={() => setActiveVideo(t)}
+                className={`group bg-stone-900/50 backdrop-blur-sm border border-stone-800 hover:border-stone-700 hover:bg-stone-900 rounded-[2rem] p-8 transition-all duration-500 ${t.glow} relative overflow-hidden cursor-pointer ${i === 3 ? 'lg:col-span-1 lg:col-start-1 lg:ml-auto' : ''} ${i === 4 ? 'lg:col-span-1' : ''}`}
+              >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-stone-800/20 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
                 <div className="flex items-start justify-between mb-8 relative z-10">
                   <div className="w-14 h-14 bg-stone-950 rounded-2xl flex items-center justify-center border border-stone-800 shadow-inner group-hover:-translate-y-1 transition-transform duration-500">
@@ -290,7 +305,7 @@ const Landing = () => {
                 <div className="flex items-center justify-between pt-6 border-t border-stone-800/50 relative z-10">
                   <span className="flex items-center gap-2 text-xs font-bold text-stone-500 uppercase tracking-widest"><FaClock className="w-3.5 h-3.5" />{t.days} Day Cycle</span>
                   <div className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
-                     <FaArrowRight className="w-3 h-3 text-stone-400 group-hover:text-white transition-colors" />
+                     <FaPlay className="w-3 h-3 ml-0.5 text-stone-400 group-hover:text-white transition-colors" />
                   </div>
                 </div>
               </div>

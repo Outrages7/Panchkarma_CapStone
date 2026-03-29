@@ -8,6 +8,7 @@ import {
   clearMessage,
 } from "../../redux/slices/authSlice";
 import { SPECIALIZATION_OPTIONS, getSpecializationDescription } from "../../utils/specializations";
+import api from "../../services/api";
 
 const DarkInput = ({ label, name, type = "text", value, onChange, placeholder, error, min, icon: Icon, required }) => (
   <div className="space-y-1.5 w-full">
@@ -57,9 +58,11 @@ const Register = () => {
     experience: "",
     consultationFee: "",
     department: "",
+    otp: "",
   });
 
   const [formErrors, setFormErrors] = useState({});
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   useEffect(() => {
     dispatch(clearError());
@@ -162,12 +165,34 @@ const Register = () => {
     setStep(3);
   };
 
-  const handleSubmit = async (e) => {
+  const handleRequestOtp = async (e) => {
     e.preventDefault();
 
     const errors = validateStep3();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      return;
+    }
+
+    try {
+      setIsSendingOtp(true);
+      await api.post("/auth/send-otp", {
+        email: formData.email,
+        firstName: formData.firstName,
+      });
+      setStep(4);
+    } catch (err) {
+      setFormErrors({ apiError: err.response?.data?.error?.message || "Failed to send OTP" });
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleSubmitFinal = async (e) => {
+    e.preventDefault();
+
+    if (!formData.otp || formData.otp.length !== 6) {
+      setFormErrors({ otp: "Please enter a valid 6-digit OTP." });
       return;
     }
 
@@ -188,14 +213,14 @@ const Register = () => {
       submitData.licenseNumber = formData.licenseNumber;
       submitData.experience = parseInt(formData.experience);
       submitData.consultationFee = parseFloat(formData.consultationFee);
-    } else if (selectedRole === "admin") {
-      // No extra fields for admin self-registration
     }
+
+    submitData.otp = formData.otp;
 
     await dispatch(register(submitData));
   };
 
-  const stepLabels = ["Account Type", "Details", "Profile"];
+  const stepLabels = ["Account Type", "Details", "Profile", "Verify"];
 
 
   return (
@@ -278,7 +303,7 @@ const Register = () => {
           {/* Neural Progress Bar */}
           <div className="flex items-center mb-10 relative">
              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-stone-800 -translate-y-1/2 z-0"></div>
-             <div className="absolute top-1/2 left-0 h-0.5 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500" style={{ width: `${(step - 1) * 50}%` }}></div>
+             <div className="absolute top-1/2 left-0 h-0.5 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500" style={{ width: `${(step - 1) * 33.33}%` }}></div>
              
              {stepLabels.map((lbl, i) => {
                const idx = i + 1;
@@ -301,6 +326,13 @@ const Register = () => {
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-2xl text-sm font-medium flex gap-3 mb-8">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse mt-1.5 shrink-0"></div>
               {error}
+            </div>
+          )}
+
+          {formErrors.apiError && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-2xl text-sm font-medium flex gap-3 mb-8">
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse mt-1.5 shrink-0"></div>
+              {formErrors.apiError}
             </div>
           )}
 
@@ -387,7 +419,7 @@ const Register = () => {
 
           {/* Step 3: Role-specific Clearance */}
           {step === 3 && (
-            <form onSubmit={handleSubmit} className="space-y-5 animate-in slide-in-from-right-8 duration-500">
+            <form onSubmit={handleRequestOtp} className="space-y-5 animate-in slide-in-from-right-8 duration-500">
               {selectedRole === "patient" && (
                 <div className="space-y-5 border border-stone-800 bg-stone-900/50 p-6 rounded-2xl">
                   <div className="flex items-center gap-3 mb-2">
@@ -472,6 +504,62 @@ const Register = () => {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSendingOtp}
+                  className="w-2/3 flex items-center justify-center gap-3 px-6 py-4 text-sm font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSendingOtp ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Sending OTP...
+                    </>
+                  ) : (
+                    "Send OTP"
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Step 4: OTP Verification */}
+          {step === 4 && (
+            <form onSubmit={handleSubmitFinal} className="space-y-5 animate-in slide-in-from-right-8 duration-500">
+              <div className="border border-stone-800 bg-stone-900/50 p-6 rounded-2xl text-center">
+                <div className="mx-auto w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mb-4">
+                  <FaEnvelope className="w-5 h-5 text-emerald-400" />
+                </div>
+                <h3 className="text-white font-extrabold text-lg mb-2">Verify your email address</h3>
+                <p className="text-sm font-medium text-stone-400 mb-6">
+                  We sent a 6-digit confirmation code to <span className="text-white bg-stone-800 px-2 py-0.5 rounded-md">{formData.email}</span>
+                </p>
+
+                <div className="max-w-[200px] mx-auto mb-2">
+                  <DarkInput 
+                    type="text" 
+                    name="otp" 
+                    value={formData.otp} 
+                    onChange={handleChange} 
+                    error={formErrors.otp}
+                    placeholder="245089" 
+                  />
+                </div>
+                <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mt-6">
+                  Code expires in 10 minutes
+                </p>
+              </div>
+
+              <div className="flex gap-4 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="w-1/3 flex items-center justify-center gap-2 px-6 py-4 text-[11px] font-black uppercase tracking-widest text-stone-400 bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:text-white rounded-xl transition"
+                >
+                  <FaArrowLeft className="w-3 h-3" /> Back
+                </button>
+                <button
+                  type="submit"
                   disabled={loading}
                   className="w-2/3 flex items-center justify-center gap-3 px-6 py-4 text-sm font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -481,10 +569,10 @@ const Register = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Creating Account...
+                      Verifying...
                     </>
                   ) : (
-                    "Create Account"
+                    "Verify & Register"
                   )}
                 </button>
               </div>

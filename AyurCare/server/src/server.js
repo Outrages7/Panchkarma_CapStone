@@ -100,30 +100,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Root route
-app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'AyurCare API Server',
-    version: '1.0.0',
-    endpoints: {
-      health: '/api/health',
-      auth: '/api/auth',
-      admin: '/api/admin',
-      doctor: '/api/doctor',
-      patient: '/api/patient',
-      therapyTypes: '/api/therapy-types',
-      treatmentPlans: '/api/treatment-plans',
-      therapySessions: '/api/therapy-sessions',
-      healthScores: '/api/health-scores',
-      inventory: '/api/inventory',
-      therapyRooms: '/api/therapy-rooms',
-      ai: '/api/ai',
-      notifications: '/api/notifications'
-    }
-  });
-});
-
 // Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({

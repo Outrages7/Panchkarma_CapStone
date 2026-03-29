@@ -1,7 +1,1 @@
 .vercel
-.env
-.env.local
-.env.production
-.env.template
-createAdmin.js
-fixAdmin.js
